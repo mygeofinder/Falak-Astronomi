@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falak & Astro INSTUN</title>
+    <title>Falak & Astro INSTUN v1.0</title>
     
     <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
@@ -55,10 +55,13 @@
 
         /* SVG Charts */
         .diagram-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-items: center; }
-        .svg-h { width: 300px; height: 300px; }
+        .svg-h { width: 300px; height: 300px; position: relative; }
         .svg-v { width: 150px; height: 300px; }
         .sun-status-text { text-align: center; font-size: 0.95rem; margin-top: -5px; margin-bottom: 15px; font-weight: bold;}
 
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; color: white; margin-top: 4px; }
+        .bg-gold { background: #ffb300; color: #000; }
+        .bg-blue { background: #3f51b5; }
         .footer { text-align: center; font-size: 0.8rem; color: #777; padding: 20px; }
 
         /* Planet Table specific styles */
@@ -69,8 +72,8 @@
 <body>
 
 <header>
-    <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO INSTUN</div>
-    <div style="font-size: 0.8rem; opacity: 0.9;">Trial Version (Sensor Elevasi, Kompas Peta & 59 Zon)</div>
+    <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO PRO V1.93</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Peta Satelit & Putaran Pedoman Suria)</div>
 </header>
 
 <div class="container">
@@ -87,7 +90,7 @@
         
         <div class="map-wrapper">
             <div id="map"></div>
-            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="top: 10px; right: 10px; padding: 5px; font-size: 1.2rem;" title="Aktifkan Putaran Peta">🧭</button>
+            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="top: 10px; left: 50px; padding: 5px; font-size: 1.2rem;" title="Aktifkan Putaran Peta">🧭</button>
             <div class="btn-map-control" style="bottom: 10px; left: 10px; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; background: rgba(255,255,255,0.8);">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px; margin:0;">
                     <input type="checkbox" id="chk-qibla-line" onchange="updateQiblaLine()"> Garisan Kiblat
@@ -180,7 +183,10 @@
         <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
         
         <div class="diagram-container">
-            <div class="svg-h"><svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%;"></svg></div>
+            <div class="svg-h">
+                <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 5px; font-size: 1.2rem;" title="Aktifkan Putaran Kompas">🧭</button>
+                <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.2s ease-out;"></svg>
+            </div>
             <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
         </div>
 
@@ -241,7 +247,7 @@
     </div>
 
 </div>
-<div class="footer">Falak & Astro Trial Version &copy; 2026</div>
+<div class="footer">Falak & Astro INSTUN v1.0&copy; 2026</div>
 
 <script>
     // --- PEMBOLEH UBAH GLOBAL ---
@@ -250,6 +256,7 @@
     let map, marker, qiblaLine = null;
     let isJakimMode = false;
     let isMapRotating = false;
+    let isCompassRotating = false;
 
     // Pangkalan Data 59 Zon JAKIM Lengkap
     const jakimZones = [
@@ -322,8 +329,18 @@
 
     // --- LOKASI & PETA ---
     function initMap() {
-        map = L.map('map').setView([userCoords.lat, userCoords.lon], 10);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
+        var satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
+
+        map = L.map('map', {
+            center: [userCoords.lat, userCoords.lon],
+            zoom: 10,
+            layers: [osmLayer] // Layer default
+        });
+
+        // Tambah kawalan layer untuk Satelit vs Peta Biasa
+        L.control.layers({"Peta Biasa (OSM)": osmLayer, "Peta Satelit (Esri)": satLayer}).addTo(map);
+
         marker = L.marker([userCoords.lat, userCoords.lon]).addTo(map);
         map.on('click', e => { 
             if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
@@ -375,6 +392,41 @@
             qiblaLine = L.polyline([[userCoords.lat, userCoords.lon], [21.422487, 39.826206]], {color: 'var(--qibla)', weight: 4, dashArray: '5, 5'}).addTo(map);
         } else {
             if(qiblaLine) map.removeLayer(qiblaLine);
+        }
+    }
+
+    // --- PUTARAN PEDOMAN SURIA (GRAF SVG) ---
+    function toggleCompassRotation() {
+        isCompassRotating = !isCompassRotating;
+        let btn = document.getElementById('btn-compass-rotate');
+        if (isCompassRotating) {
+            btn.style.background = "var(--accent)";
+            btn.style.color = "white";
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission().then(response => {
+                    if (response === 'granted') window.addEventListener('deviceorientationabsolute', handleSvgRotation, true);
+                }).catch(e => alert("Kebenaran sensor diperlukan untuk peranti iOS."));
+            } else {
+                window.addEventListener('deviceorientationabsolute', handleSvgRotation, true);
+                window.addEventListener('deviceorientation', handleSvgRotationAndroid, true);
+            }
+        } else {
+            btn.style.background = "white";
+            btn.style.color = "black";
+            window.removeEventListener('deviceorientationabsolute', handleSvgRotation, true);
+            window.removeEventListener('deviceorientation', handleSvgRotationAndroid, true);
+            document.getElementById('svg-horizontal').style.transform = `rotate(0deg)`;
+        }
+    }
+
+    function handleSvgRotation(e) {
+        let heading = e.alpha || e.webkitCompassHeading;
+        if (heading !== null) document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
+    }
+    function handleSvgRotationAndroid(e) {
+        if(!e.absolute && e.alpha !== null) {
+            let heading = 360 - e.alpha;
+            document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
         }
     }
 
@@ -444,7 +496,7 @@
         
         map.setView([userCoords.lat, userCoords.lon], map.getZoom()); 
         marker.setLatLng([userCoords.lat, userCoords.lon]);
-        updateQiblaLine(); // kemas kini garis kiblat peta
+        updateQiblaLine();
     }
 
     function syncDMS() {
@@ -457,7 +509,7 @@
     function syncTime() { targetTime = new Date(document.getElementById('in-datetime').value); runCalculations(); }
     function setRealTime() { targetTime = new Date(); updateUI(); runCalculations(); }
     function fmtDMS(deg) { let a=Math.abs(deg), d=Math.floor(a), m=Math.floor((a-d)*60), s=((a-d)*60-m)*60; return `${deg<0?'-':''}${d}° ${m.toString().padStart(2,'0')}' ${s.toFixed(2).padStart(5,'0')}"`; }
-    const fmtT = d => d ? d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit', hour12:false}) : "--:--";
+    const fmtT = d => d ? d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false}) : "--:--:--";
 
     // --- LUKIS SVG ---
     function drawCompassFace() {
@@ -551,10 +603,11 @@
 
         // 5. ASTROFOTO
         const tms = SunCalc.getTimes(targetTime, lat, lon);
-        document.getElementById('astro-gold-am').innerText = fmtT(tms.goldenHourEnd); 
-        document.getElementById('astro-blue-am').innerText = fmtT(tms.sunriseEnd);
-        document.getElementById('astro-gold-pm').innerText = fmtT(tms.goldenHour); 
-        document.getElementById('astro-blue-pm').innerText = fmtT(tms.dusk);
+        const fmtA = d => d ? d.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit', hour12:false}) : "--:--";
+        document.getElementById('astro-gold-am').innerText = fmtA(tms.goldenHourEnd); 
+        document.getElementById('astro-blue-am').innerText = fmtA(tms.sunriseEnd);
+        document.getElementById('astro-gold-pm').innerText = fmtA(tms.goldenHour); 
+        document.getElementById('astro-blue-pm').innerText = fmtA(tms.dusk);
 
         // 6. PLANET TABLE
         try {
