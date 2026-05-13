@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falak & Astro INSTUN V1.0</title>
+    <title>Falak & Astro INSTUN Trial Version</title>
     
     <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
@@ -30,9 +30,9 @@
         input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; background:#f9f9f9; box-sizing: border-box; }
         
         /* Map Wrapper Styling */
-        .map-wrapper { position: relative; overflow: hidden; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 250px; min-height: 250px; }
+        .map-wrapper { position: relative; overflow: hidden; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 300px; min-height: 300px; }
         #map { height: 100%; width: 100%; transition: transform 0.2s ease-out; }
-        .btn-map-control { position: absolute; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; }
+        .btn-map-control { position: absolute; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
         .dms-container { display: flex; gap: 4px; align-items: center; }
         .dms-container input { padding: 6px 4px; text-align: center; }
@@ -54,7 +54,7 @@
         .param-group input[type="number"] { width: 70px; padding:4px 8px; font-weight:bold; }
 
         /* SVG Charts */
-        .diagram-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-items: center; }
+        .diagram-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-items: center; position: relative; }
         .svg-h { width: 300px; height: 300px; position: relative; }
         .svg-v { width: 150px; height: 300px; }
         .sun-status-text { text-align: center; font-size: 0.95rem; margin-top: -5px; margin-bottom: 15px; font-weight: bold;}
@@ -72,8 +72,8 @@
 <body>
 
 <header>
-    <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO INSTUN V1.0</div>
-    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Peta Satelit & Putaran Pedoman Suria)</div>
+    <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO INSTUN Trial Version</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (iOS Sensor Fix & Permanent Map Layers)</div>
 </header>
 
 <div class="container">
@@ -90,8 +90,8 @@
         
         <div class="map-wrapper">
             <div id="map"></div>
-            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="top: 10px; left: 50px; padding: 5px; font-size: 1.2rem;" title="Aktifkan Putaran Peta">🧭</button>
-            <div class="btn-map-control" style="bottom: 10px; left: 10px; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; background: rgba(255,255,255,0.8);">
+            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="bottom: 50px; left: 10px; padding: 6px; font-size: 1.2rem;" title="Aktifkan Putaran Peta">🧭</button>
+            <div class="btn-map-control" style="bottom: 10px; left: 10px; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; background: rgba(255,255,255,0.9);">
                 <label style="cursor:pointer; display:flex; align-items:center; gap:5px; margin:0;">
                     <input type="checkbox" id="chk-qibla-line" onchange="updateQiblaLine()"> Garisan Kiblat
                 </label>
@@ -184,7 +184,7 @@
         
         <div class="diagram-container">
             <div class="svg-h">
-                <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 5px; font-size: 1.2rem;" title="Aktifkan Putaran Kompas">🧭</button>
+                <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 6px; font-size: 1.2rem; z-index:100;" title="Aktifkan Putaran Kompas">🧭</button>
                 <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.2s ease-out;"></svg>
             </div>
             <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
@@ -247,7 +247,7 @@
     </div>
 
 </div>
-<div class="footer">Falak & Astro INSTUN V1.0 &copy; 2026</div>
+<div class="footer">Falak & Astro INSTUN Trial Version &copy; 2026</div>
 
 <script>
     // --- PEMBOLEH UBAH GLOBAL ---
@@ -335,11 +335,11 @@
         map = L.map('map', {
             center: [userCoords.lat, userCoords.lon],
             zoom: 10,
-            layers: [osmLayer] // Layer default
+            layers: [osmLayer]
         });
 
-        // Tambah kawalan layer untuk Satelit vs Peta Biasa
-        L.control.layers({"Peta Biasa (OSM)": osmLayer, "Peta Satelit (Esri)": satLayer}).addTo(map);
+        // Paksa Menu Layer sentiasa terbuka (expanded) supaya jelas di telefon
+        L.control.layers({"🗺️ Peta Biasa (OSM)": osmLayer, "🛰️ Peta Satelit (Esri)": satLayer}, null, {collapsed: false, position: 'topright'}).addTo(map);
 
         marker = L.marker([userCoords.lat, userCoords.lon]).addTo(map);
         map.on('click', e => { 
@@ -354,27 +354,33 @@
         isMapRotating = !isMapRotating;
         let btn = document.getElementById('btn-map-rotate');
         if (isMapRotating) {
-            btn.style.background = "var(--accent)";
-            btn.style.color = "white";
+            btn.style.background = "var(--accent)"; btn.style.color = "white";
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // Untuk iOS Safari
                 DeviceOrientationEvent.requestPermission().then(response => {
-                    if (response === 'granted') window.addEventListener('deviceorientationabsolute', handleMapRotation, true);
-                }).catch(e => alert("Kebenaran sensor diperlukan untuk peranti iOS."));
+                    if (response === 'granted') window.addEventListener('deviceorientation', handleMapRotationIOS, true);
+                    else { alert("Akses sensor ditolak."); toggleMapRotation(); }
+                }).catch(e => { alert("Pengaktifan sensor perlukan interaksi pengguna di peranti Apple."); toggleMapRotation(); });
             } else {
+                // Untuk Android / PC
                 window.addEventListener('deviceorientationabsolute', handleMapRotation, true);
                 window.addEventListener('deviceorientation', handleMapRotationAndroid, true);
             }
         } else {
-            btn.style.background = "white";
-            btn.style.color = "black";
+            btn.style.background = "white"; btn.style.color = "black";
+            window.removeEventListener('deviceorientation', handleMapRotationIOS, true);
             window.removeEventListener('deviceorientationabsolute', handleMapRotation, true);
             window.removeEventListener('deviceorientation', handleMapRotationAndroid, true);
             document.getElementById('map').style.transform = `scale(1) rotate(0deg)`;
         }
     }
 
+    function handleMapRotationIOS(e) {
+        let heading = e.webkitCompassHeading;
+        if (heading !== undefined && heading !== null) document.getElementById('map').style.transform = `scale(1.4) rotate(${-heading}deg)`;
+    }
     function handleMapRotation(e) {
-        let heading = e.alpha || e.webkitCompassHeading;
+        let heading = e.alpha;
         if (heading !== null) document.getElementById('map').style.transform = `scale(1.4) rotate(${-heading}deg)`;
     }
     function handleMapRotationAndroid(e) {
@@ -400,27 +406,31 @@
         isCompassRotating = !isCompassRotating;
         let btn = document.getElementById('btn-compass-rotate');
         if (isCompassRotating) {
-            btn.style.background = "var(--accent)";
-            btn.style.color = "white";
+            btn.style.background = "var(--accent)"; btn.style.color = "white";
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission().then(response => {
-                    if (response === 'granted') window.addEventListener('deviceorientationabsolute', handleSvgRotation, true);
-                }).catch(e => alert("Kebenaran sensor diperlukan untuk peranti iOS."));
+                    if (response === 'granted') window.addEventListener('deviceorientation', handleSvgRotationIOS, true);
+                    else { alert("Akses sensor ditolak."); toggleCompassRotation(); }
+                }).catch(e => { alert("Pengaktifan sensor perlukan interaksi."); toggleCompassRotation(); });
             } else {
                 window.addEventListener('deviceorientationabsolute', handleSvgRotation, true);
                 window.addEventListener('deviceorientation', handleSvgRotationAndroid, true);
             }
         } else {
-            btn.style.background = "white";
-            btn.style.color = "black";
+            btn.style.background = "white"; btn.style.color = "black";
+            window.removeEventListener('deviceorientation', handleSvgRotationIOS, true);
             window.removeEventListener('deviceorientationabsolute', handleSvgRotation, true);
             window.removeEventListener('deviceorientation', handleSvgRotationAndroid, true);
             document.getElementById('svg-horizontal').style.transform = `rotate(0deg)`;
         }
     }
 
+    function handleSvgRotationIOS(e) {
+        let heading = e.webkitCompassHeading;
+        if (heading !== undefined && heading !== null) document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
+    }
     function handleSvgRotation(e) {
-        let heading = e.alpha || e.webkitCompassHeading;
+        let heading = e.alpha;
         if (heading !== null) document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
     }
     function handleSvgRotationAndroid(e) {
