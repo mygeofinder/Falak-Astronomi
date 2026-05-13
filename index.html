@@ -73,7 +73,7 @@
 
 <header>
     <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO INSTUN Trial Version</div>
-    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (iOS Sensor Fix & Permanent Map Layers)</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Anti-Jitter Compass Stabilization)</div>
 </header>
 
 <div class="container">
@@ -258,6 +258,10 @@
     let isMapRotating = false;
     let isCompassRotating = false;
 
+    // Pemboleh ubah untuk menyimpan sudut akumulatif (anti-spin & penstabilan sensor)
+    let currentMapAngle = 0;
+    let currentSvgAngle = 0;
+
     // Pangkalan Data 59 Zon JAKIM Lengkap
     const jakimZones = [
         { id: "JHR01", name: "JHR01: Pulau Aur, Pulau Pemanggil", lat: 2.44, lon: 104.52 },
@@ -349,6 +353,17 @@
         });
     }
 
+    // --- ALGORITMA PENSTABILAN SENSOR (LOW-PASS FILTER) ---
+    function getSmoothAngle(targetAngle, currentAngle) {
+        // Cari beza laluan terpendek (elak lompatan pusingan 359 darjah ke 1 darjah)
+        let diff = targetAngle - (currentAngle % 360);
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        
+        // Filter Gegaran (Smoothing Factor 0.1)
+        return currentAngle + (diff * 0.1); 
+    }
+
     // --- PUTARAN PETA KOMPAS ---
     function toggleMapRotation() {
         isMapRotating = !isMapRotating;
@@ -371,22 +386,27 @@
             window.removeEventListener('deviceorientation', handleMapRotationIOS, true);
             window.removeEventListener('deviceorientationabsolute', handleMapRotation, true);
             window.removeEventListener('deviceorientation', handleMapRotationAndroid, true);
+            currentMapAngle = 0;
             document.getElementById('map').style.transform = `scale(1) rotate(0deg)`;
         }
     }
 
     function handleMapRotationIOS(e) {
-        let heading = e.webkitCompassHeading;
-        if (heading !== undefined && heading !== null) document.getElementById('map').style.transform = `scale(1.4) rotate(${-heading}deg)`;
+        if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+            currentMapAngle = getSmoothAngle(-e.webkitCompassHeading, currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
+        }
     }
     function handleMapRotation(e) {
-        let heading = e.alpha;
-        if (heading !== null) document.getElementById('map').style.transform = `scale(1.4) rotate(${-heading}deg)`;
+        if (e.alpha !== null) {
+            currentMapAngle = getSmoothAngle(-e.alpha, currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
+        }
     }
     function handleMapRotationAndroid(e) {
         if(!e.absolute && e.alpha !== null) {
-            let heading = 360 - e.alpha;
-            document.getElementById('map').style.transform = `scale(1.4) rotate(${-heading}deg)`;
+            currentMapAngle = getSmoothAngle(-(360 - e.alpha), currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
         }
     }
 
@@ -421,22 +441,27 @@
             window.removeEventListener('deviceorientation', handleSvgRotationIOS, true);
             window.removeEventListener('deviceorientationabsolute', handleSvgRotation, true);
             window.removeEventListener('deviceorientation', handleSvgRotationAndroid, true);
+            currentSvgAngle = 0;
             document.getElementById('svg-horizontal').style.transform = `rotate(0deg)`;
         }
     }
 
     function handleSvgRotationIOS(e) {
-        let heading = e.webkitCompassHeading;
-        if (heading !== undefined && heading !== null) document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
+        if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+            currentSvgAngle = getSmoothAngle(-e.webkitCompassHeading, currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
+        }
     }
     function handleSvgRotation(e) {
-        let heading = e.alpha;
-        if (heading !== null) document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
+        if (e.alpha !== null) {
+            currentSvgAngle = getSmoothAngle(-e.alpha, currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
+        }
     }
     function handleSvgRotationAndroid(e) {
         if(!e.absolute && e.alpha !== null) {
-            let heading = 360 - e.alpha;
-            document.getElementById('svg-horizontal').style.transform = `rotate(${-heading}deg)`;
+            currentSvgAngle = getSmoothAngle(-(360 - e.alpha), currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
         }
     }
 
