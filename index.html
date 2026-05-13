@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Falak & Astro INSTUN Trial Version</title>
+    <title>Falak & Astronomi INSTUN</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     
     <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
@@ -31,7 +35,7 @@
         
         /* Map Wrapper Styling */
         .map-wrapper { position: relative; overflow: hidden; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 300px; min-height: 300px; }
-        #map { height: 100%; width: 100%; transition: transform 0.2s ease-out; }
+        #map { height: 100%; width: 100%; transition: transform 0.1s linear; }
         .btn-map-control { position: absolute; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
         .dms-container { display: flex; gap: 4px; align-items: center; }
@@ -72,8 +76,8 @@
 <body>
 
 <header>
-    <div style="font-size: 1.3rem; font-weight: bold;">FALAK & ASTRO INSTUN Trial Version</div>
-    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Anti-Jitter Compass Stabilization)</div>
+    <div style="font-size: 1.3rem; font-weight: bold;">Falak & Astronomi INSTUN</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Anti-Jitter Compass & Fixed Layer UI)</div>
 </header>
 
 <div class="container">
@@ -185,7 +189,7 @@
         <div class="diagram-container">
             <div class="svg-h">
                 <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 6px; font-size: 1.2rem; z-index:100;" title="Aktifkan Putaran Kompas">🧭</button>
-                <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.2s ease-out;"></svg>
+                <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.1s linear;"></svg>
             </div>
             <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
         </div>
@@ -247,7 +251,7 @@
     </div>
 
 </div>
-<div class="footer">Falak & Astro INSTUN Trial Version &copy; 2026</div>
+<div class="footer">Falak & Astronomi INSTUN &copy; 2026</div>
 
 <script>
     // --- PEMBOLEH UBAH GLOBAL ---
@@ -258,7 +262,7 @@
     let isMapRotating = false;
     let isCompassRotating = false;
 
-    // Pemboleh ubah untuk menyimpan sudut akumulatif (anti-spin & penstabilan sensor)
+    // Pemboleh ubah Anti-Jitter (Low-Pass Filter)
     let currentMapAngle = 0;
     let currentSvgAngle = 0;
 
@@ -331,7 +335,7 @@
         setTimeout(() => getCurrentLocation(true), 1000);
     };
 
-    // --- LOKASI & PETA ---
+    // --- LOKASI, PETA & UI EXTRACTION ---
     function initMap() {
         var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
         var satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
@@ -339,11 +343,27 @@
         map = L.map('map', {
             center: [userCoords.lat, userCoords.lon],
             zoom: 10,
-            layers: [osmLayer]
+            layers: [osmLayer],
+            zoomControl: false // Disable zoom control briefly to reposition it
         });
 
-        // Paksa Menu Layer sentiasa terbuka (expanded) supaya jelas di telefon
-        L.control.layers({"🗺️ Peta Biasa (OSM)": osmLayer, "🛰️ Peta Satelit (Esri)": satLayer}, null, {collapsed: false, position: 'topright'}).addTo(map);
+        // Layer sentiasa ikon kecil terlipat (collapsed: true)
+        L.control.layers({"🗺️ Peta Biasa": osmLayer, "🛰️ Satelit": satLayer}, null, {collapsed: true, position: 'topright'}).addTo(map);
+        L.control.zoom({ position: 'topleft' }).addTo(map);
+
+        // HACK: Ekstrak kawalan UI Leaflet supaya ia TIDAK berputar apabila map diputar!
+        let controlContainer = document.querySelector('.leaflet-control-container');
+        document.querySelector('.map-wrapper').appendChild(controlContainer);
+        controlContainer.style.position = 'absolute';
+        controlContainer.style.top = '0';
+        controlContainer.style.left = '0';
+        controlContainer.style.width = '100%';
+        controlContainer.style.height = '100%';
+        controlContainer.style.pointerEvents = 'none'; // Biarkan klik menembusi ke map
+
+        // Pastikan butang interaktif UI masih boleh diklik
+        let controls = controlContainer.querySelectorAll('.leaflet-control');
+        controls.forEach(c => c.style.pointerEvents = 'auto');
 
         marker = L.marker([userCoords.lat, userCoords.lon]).addTo(map);
         map.on('click', e => { 
@@ -354,14 +374,11 @@
     }
 
     // --- ALGORITMA PENSTABILAN SENSOR (LOW-PASS FILTER) ---
-    function getSmoothAngle(targetAngle, currentAngle) {
-        // Cari beza laluan terpendek (elak lompatan pusingan 359 darjah ke 1 darjah)
-        let diff = targetAngle - (currentAngle % 360);
-        if (diff > 180) diff -= 360;
-        if (diff < -180) diff += 360;
-        
-        // Filter Gegaran (Smoothing Factor 0.1)
-        return currentAngle + (diff * 0.1); 
+    function getSmoothHeading(targetHeading, currentHeading) {
+        let diff = targetHeading - (currentHeading % 360);
+        // Normalisasi beza pusingan supaya ia mengambil laluan paling pendek (-180 ke 180)
+        diff = ((diff + 540) % 360) - 180;
+        return currentHeading + (diff * 0.08); // 0.08 adalah faktor kelembutan/anti-gegaran
     }
 
     // --- PUTARAN PETA KOMPAS ---
@@ -371,13 +388,11 @@
         if (isMapRotating) {
             btn.style.background = "var(--accent)"; btn.style.color = "white";
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // Untuk iOS Safari
                 DeviceOrientationEvent.requestPermission().then(response => {
                     if (response === 'granted') window.addEventListener('deviceorientation', handleMapRotationIOS, true);
                     else { alert("Akses sensor ditolak."); toggleMapRotation(); }
-                }).catch(e => { alert("Pengaktifan sensor perlukan interaksi pengguna di peranti Apple."); toggleMapRotation(); });
+                }).catch(e => { alert("Pengaktifan sensor perlukan interaksi pengguna."); toggleMapRotation(); });
             } else {
-                // Untuk Android / PC
                 window.addEventListener('deviceorientationabsolute', handleMapRotation, true);
                 window.addEventListener('deviceorientation', handleMapRotationAndroid, true);
             }
@@ -393,20 +408,22 @@
 
     function handleMapRotationIOS(e) {
         if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-            currentMapAngle = getSmoothAngle(-e.webkitCompassHeading, currentMapAngle);
-            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
+            currentMapAngle = getSmoothHeading(e.webkitCompassHeading, currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${-currentMapAngle}deg)`;
         }
     }
     function handleMapRotation(e) {
         if (e.alpha !== null) {
-            currentMapAngle = getSmoothAngle(-e.alpha, currentMapAngle);
-            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
+            let heading = 360 - e.alpha;
+            currentMapAngle = getSmoothHeading(heading, currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${-currentMapAngle}deg)`;
         }
     }
     function handleMapRotationAndroid(e) {
         if(!e.absolute && e.alpha !== null) {
-            currentMapAngle = getSmoothAngle(-(360 - e.alpha), currentMapAngle);
-            document.getElementById('map').style.transform = `scale(1.4) rotate(${currentMapAngle}deg)`;
+            let heading = 360 - e.alpha;
+            currentMapAngle = getSmoothHeading(heading, currentMapAngle);
+            document.getElementById('map').style.transform = `scale(1.4) rotate(${-currentMapAngle}deg)`;
         }
     }
 
@@ -448,20 +465,22 @@
 
     function handleSvgRotationIOS(e) {
         if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
-            currentSvgAngle = getSmoothAngle(-e.webkitCompassHeading, currentSvgAngle);
-            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
+            currentSvgAngle = getSmoothHeading(e.webkitCompassHeading, currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${-currentSvgAngle}deg)`;
         }
     }
     function handleSvgRotation(e) {
         if (e.alpha !== null) {
-            currentSvgAngle = getSmoothAngle(-e.alpha, currentSvgAngle);
-            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
+            let heading = 360 - e.alpha;
+            currentSvgAngle = getSmoothHeading(heading, currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${-currentSvgAngle}deg)`;
         }
     }
     function handleSvgRotationAndroid(e) {
         if(!e.absolute && e.alpha !== null) {
-            currentSvgAngle = getSmoothAngle(-(360 - e.alpha), currentSvgAngle);
-            document.getElementById('svg-horizontal').style.transform = `rotate(${currentSvgAngle}deg)`;
+            let heading = 360 - e.alpha;
+            currentSvgAngle = getSmoothHeading(heading, currentSvgAngle);
+            document.getElementById('svg-horizontal').style.transform = `rotate(${-currentSvgAngle}deg)`;
         }
     }
 
@@ -494,7 +513,6 @@
         }
     }
 
-    // --- UI PENYEGERAKAN ---
     function populateJakim() {
         let sel = document.getElementById('sel-jakim');
         jakimZones.forEach(z => { sel.innerHTML += `<option value="${z.id}" ${z.id==="WLY01"?"selected":""}>${z.name}</option>`; });
