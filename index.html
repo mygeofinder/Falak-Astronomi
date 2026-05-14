@@ -71,6 +71,280 @@
         /* Planet Table specific styles */
         .planet-table th { font-size: 0.75rem; background:#f3e5f5; }
         .planet-table td { font-size: 0.95rem; border-bottom: 1px solid #eee; padding: 8px; }
+        
+        /* Qibla Compass specific styles */
+        #qibla-compass-container { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 1.3rem; font-weight: bold;">Falak & Astronomi INSTUN</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Anti-Jitter Compass & Fixed Layer UI)</div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>📍 Lokasi & Masa</h2>
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <input type="text" id="poi-search" placeholder="Cari POI (Cth: KLCC, Kaabah)...">
+            <button class="btn btn-accent" style="flex: 0 0 80px;" onclick="searchPOI()">Cari</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-accent" onclick="getCurrentLocation()">📍 Guna GPS</button>
+            <button class="btn" onclick="setRealTime()">⏱️ Waktu Semasa</button>
+        </div>
+        
+        <div class="map-wrapper">
+            <div id="map"></div>
+            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="bottom: 50px; left: 10px; padding: 6px; font-size: 1.2rem; display:none;" title="Aktifkan Putaran Peta">🧭</button>
+            <div class="btn-map-control" style="bottom: 10px; left: 10px; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; background: rgba(255,255,255,0.9);">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; margin:0;">
+                    <input type="checkbox" id="chk-qibla-line" onchange="updateQiblaLine()"> Garisan Kiblat
+                </label>
+            </div>
+        </div>
+
+        <div class="jakim-box">
+            <label class="jakim-label">
+                <input type="checkbox" id="chk-jakim" onchange="toggleJakim()"> 
+                <span>Gunakan Rujukan 59 Zon JAKIM</span>
+            </label>
+            <div id="jakim-selector" style="display: none; margin-top: 10px;">
+                <select id="sel-jakim" onchange="syncFromJakim()"></select>
+            </div>
+        </div>
+
+        <div class="grid-2 mt-2">
+            <div class="form-group">
+                <span class="label">Latitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lat-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lat-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lat-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lat-dir" onchange="syncDMS()"><option value="1">N</option><option value="-1">S</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Longitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lon-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lon-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lon-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lon-dir" onchange="syncDMS()"><option value="1">E</option><option value="-1">W</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Tarikh & Masa (Zon Tempatan Peranti)</span>
+                <input type="datetime-local" id="in-datetime" step="1" onchange="syncTime()">
+            </div>
+            <div class="form-group">
+                <span class="label">Elevasi (Meter dpl)</span>
+                <input type="number" id="in-elev" value="0" onchange="runCalculations()">
+            </div>
+            <div class="form-group" style="grid-column: span 2; background:#fff3e0; padding:6px 10px; border-radius:6px; font-size:0.8rem; font-weight:bold; color:#e65100;">
+                ⚠️ Nota Waktu: Pengiraan dipaparkan mengikut Waktu Tempatan bagi Koordinat Terpilih (Auto-Timezone).
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🕌 Waktu Solat (Bisection) & Parameter</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 10px;">
+            <div class="param-group">
+                Subuh: 
+                <select id="sel-subuh" onchange="checkCustom('subuh')">
+                    <option value="12">12°</option><option value="15">15°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18">18°</option>
+                    <option value="18.5">18.5°</option><option value="19">19°</option><option value="20">20° (JAKIM)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-subuh" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+            <div class="param-group">
+                Isyak: 
+                <select id="sel-isyak" onchange="checkCustom('isyak')">
+                    <option value="12">12°</option><option value="13">13°</option><option value="14">14°</option>
+                    <option value="15">15°</option><option value="16">16°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18">18°</option><option value="19">19°</option><option value="20">20°</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-isyak" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr><th>Subuh</th><th>Syuruk</th><th>Zohor</th><th>Asar</th><th>Maghrib</th><th>Isyak</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="p-subuh">-</td><td id="p-syuruk">-</td><td id="p-zohor">-</td>
+                        <td id="p-asar">-</td><td id="p-maghrib">-</td><td id="p-isyak">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🧭 Kompas Kiblat (Sensor Peranti)</h2>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-accent" id="btn-qibla-compass" onclick="startQiblaCompass()" style="width: auto; padding: 10px 20px;">Aktifkan Kompas Kiblat</button>
+        </div>
+        
+        <div id="qibla-compass-wrapper" style="display:none;">
+            <div id="qibla-compass-container" style="position: relative; width: 220px; height: 220px; margin: 0 auto; border-radius: 50%; border: 6px solid #333; background: white; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
+                <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid red; z-index: 10;"></div>
+                <div id="qibla-dial" style="position: absolute; width: 100%; height: 100%; transition: transform 0.1s linear;">
+                    <div style="position:absolute; top: 8px; left: 50%; transform: translateX(-50%); font-weight:bold; color:#666;">N</div>
+                    <div style="position:absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-weight:bold; color:#666;">S</div>
+                    <div style="position:absolute; top: 50%; right: 8px; transform: translateY(-50%); font-weight:bold; color:#666;">E</div>
+                    <div style="position:absolute; top: 50%; left: 8px; transform: translateY(-50%); font-weight:bold; color:#666;">W</div>
+                    <div id="qibla-pointer-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(0deg);">
+                        <div style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 4px; height: 35%; background: var(--qibla); border-radius: 2px;"></div>
+                        <div style="position: absolute; top: -5%; left: 50%; transform: translateX(-50%); font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🕋</div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px; font-size: 0.9rem; font-weight: bold; color: #444;">
+                Arah Telefon: <span id="phone-heading" style="color:red;">0</span>° &nbsp;|&nbsp; Azimut Kiblat: <span id="qibla-target" style="color:var(--qibla);">0</span>°
+            </div>
+            <p style="text-align:center; font-size:0.75rem; color:#888; margin-top:5px;">Putar telefon sehingga jarum 🕋 sejajar dengan anak panah merah.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🌍 Pedoman Suria Visual (DMS)</h2>
+        <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
+        
+        <div class="diagram-container">
+            <div class="svg-h">
+                <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 6px; font-size: 1.2rem; z-index:100; display:none;" title="Aktifkan Putaran Kompas">🧭</button>
+                <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.1s linear;"></svg>
+            </div>
+            <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
+        </div>
+
+        <div class="grid-data" style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <div><span class="label">Azimut Kiblat</span> <span id="dms-qibla" class="highlight">-</span></div>
+            <div><span class="label">Azimut Matahari</span> <span id="dms-sun-az">-</span></div>
+            <div><span class="label">Altitud Matahari</span> <span id="dms-sun-alt">-</span></div>
+            <div><span class="label">Arah Bayang</span> <span id="dms-shadow">-</span></div>
+            <div><span class="label">Azimut Bulan</span> <span id="dms-moon-az">-</span></div>
+            <div><span class="label">Altitud Bulan</span> <span id="dms-moon-alt">-</span></div>
+            <div style="grid-column: span 2; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 5px;">
+                <span class="label" style="color:var(--primary);">Waktu Bayang Kiblat Harian (Istiwa Kiblat)</span> 
+                <span id="qibla-shadow-time" style="font-weight: bold; font-size: 0.95rem;">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid gold;">
+        <h2>📸 Modul Astrofotografi (Pencahayaan)</h2>
+        <div style="font-family: 'Segoe UI', sans-serif; font-size: 0.95rem; font-weight: bold; color: #333; display: flex; flex-direction: column; gap: 8px; background: #fafafa; padding: 10px; border-radius: 6px;">
+            <div style="display: flex;"><div style="width: 170px;">Golden Hour (Pagi)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-gold-am">-</div><div style="color:#f57f17; font-weight:normal;">(Masa Emas)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Blue Hour (Pagi)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-blue-am">-</div><div style="color:#3f51b5; font-weight:normal;">(Cahaya Biru)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Golden Hour (Petang)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-gold-pm">-</div><div style="color:#f57f17; font-weight:normal;">(Masa Emas)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Blue Hour (Petang)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-blue-pm">-</div><div style="color:#3f51b5; font-weight:normal;">(Cahaya Biru)</div></div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--astro);">
+        <h2>🪐 Modul Kedudukan Planet (Ephemeris)</h2>
+        <div class="table-responsive">
+            <table class="planet-table">
+                <thead>
+                    <tr><th>Planet</th><th>Azimuth</th><th>Altitude</th></tr>
+                </thead>
+                <tbody id="planet-tbody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #333;">
+        <h2>🌠 Modul Supermoon, Dark Sky & Fenomena</h2>
+        <div class="grid-data">
+            <div>
+                <span class="label">Status Jarak Bulan</span>
+                <span id="res-moon-dist" style="font-weight:bold; color:var(--primary);">-</span>
+                <div id="res-moon-illu" style="font-size:0.8rem; color:#555;">-</div>
+            </div>
+            <div>
+                <span class="label">Tahap Pencemaran Cahaya</span>
+                <span id="res-darksky" style="font-weight:bold; color:#333;">-</span>
+            </div>
+            <div style="grid-column: span 2; border-top:1px solid #eee; padding-top:8px;">
+                <span class="label">Hujan Meteor Utama Bulanan</span>
+                <span id="meteor-list" style="font-size:0.85rem; color:#444; font-weight:bold;">-</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="footer">Falak & Astronomi INSTUN &copy; 2026</div>
+
+<script>
+    // --- PEMBOLEH UBAH GLOBAL ---
+    let userCoords = { lat: 3.1390, lon: 101.6869 };
+    let targetTime = new Date();
+    let map, marker, qiblaLine = null;
+    let isJakimMode = false;
+    let isMapRotating = false;
+    let isCompassRotating = false;
+
+    // Pemboleh ubah Anti-Jitter
+    let currentMapAngle = 0;
+    let currentSvgAngle = 0;
+    window.currentQiblaAzimuth = 0;
+
+    // Pangkalan Data 59 Zon JAKIM Lengkap
+    const jakimZones = [
+        { id: "JHR01", name: "JHR01: Pulau Aur, Pulau Pemanggil", lat: 2.44, lon: 104.52 },
+        { id: "JHR02", name: "JHR02: Johor Bahru, Kota Tinggi, Mersing, Kulai", lat: 1.49, lon: 103.73 },
+        { id: "JHR03", name: "JHR03: Kluang, Pontian", lat: 2.03, lon: 103.32 },
+        { id: "JHR04", name: "JHR04: Batu Pahat, Muar, Segamat, Gemas Johor, Tangkak", lat: 1.85, lon: 102.93 },
+        { id: "KDH01", name: "KDH01: Kota Setar, Kubang Pasu, Pokok Sena", lat: 6.12, lon: 100.37 },
+        { id: "KDH02", name: "KDH02: Kuala Muda, Yan, Pendang", lat: 5.64, lon: 100.49 },
+        { id: "KDH03", name: "KDH03: Padang Terap, Sik", lat: 6.25, lon: 100.60 },
+        { id: "KDH04"        .map-wrapper { position: relative; overflow: hidden; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 300px; min-height: 300px; }
+        #map { height: 100%; width: 100%; transition: transform 0.1s linear; }
+        .btn-map-control { position: absolute; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        .dms-container { display: flex; gap: 4px; align-items: center; }
+        .dms-container input { padding: 6px 4px; text-align: center; }
+        
+        /* JAKIM Checkbox Box Styling */
+        .jakim-box { background: #e3f2fd; padding: 12px; border-radius: 8px; border: 1px solid #bbdefb; margin-bottom: 10px; }
+        .jakim-label { font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; color: #0d47a1; margin: 0;}
+        .jakim-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; }
+        
+        /* Table Style */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; text-align: center; }
+        th { padding: 8px; color: #666; font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 12px 8px; font-weight: bold; color: var(--primary); font-size: 1.05rem; }
+
+        /* Custom Input styling for parameters */
+        .param-group { display:flex; align-items: center; gap:8px; font-size:0.85rem; font-weight:bold; }
+        .param-group select { width:auto; padding:4px 8px; font-weight:bold; }
+        .param-group input[type="number"] { width: 70px; padding:4px 8px; font-weight:bold; }
+
+        /* SVG Charts */
+        .diagram-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-items: center; position: relative; }
+        .svg-h { width: 300px; height: 300px; position: relative; }
+        .svg-v { width: 150px; height: 300px; }
+        .sun-status-text { text-align: center; font-size: 0.95rem; margin-top: -5px; margin-bottom: 15px; font-weight: bold;}
+
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; color: white; margin-top: 4px; }
+        .bg-gold { background: #ffb300; color: #000; }
+        .bg-blue { background: #3f51b5; }
+        .footer { text-align: center; font-size: 0.8rem; color: #777; padding: 20px; }
+
+        /* Planet Table specific styles */
+        .planet-table th { font-size: 0.75rem; background:#f3e5f5; }
+        .planet-table td { font-size: 0.95rem; border-bottom: 1px solid #eee; padding: 8px; }
     </style>
 </head>
 <body>
