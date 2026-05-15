@@ -2,21 +2,21 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falak & Astronomi INSTUN</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d47a1">
+    <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     
     <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         :root { --primary: #0d47a1; --accent: #ff6f00; --qibla: #4caf50; --sun: #ff9800; --moon: #9e9e9e; --shadow: #b71c1c; --astro: #673ab7; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: #e9ecef; color: #222; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e9ecef; color: #222; }
         header { background: var(--primary); color: white; padding: 15px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .container { max-width: 850px; margin: auto; padding: 10px; }
         .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #ddd; }
@@ -25,16 +25,357 @@
         .grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 10px; }
         .grid-data { display: grid; grid-template-cols: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; font-size: 0.85rem; }
         .label { font-weight: bold; color: #666; display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 4px;}
+        .highlight { color: var(--primary); font-weight: bold; }
         
-        .btn-group { display: flex; gap: 8px; margin-bottom: 10px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 0.85rem; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn { flex: 1; padding: 10px; border: none; border-radius: 6px; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 0.85rem;}
         .btn-accent { background: var(--accent); }
         
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; background:#f9f9f9; box-sizing: border-box; font-size: 16px; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; background:#f9f9f9; box-sizing: border-box; }
         
-        /* Map Wrapper */
-        .map-wrapper { position: relative; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 300px; background: #eee; overflow: hidden; }
-        #map { height: 100%; width: 100%; z-index: 1; }
+        /* Map Wrapper Styling */
+        .map-wrapper { position: relative; overflow: hidden; border-radius: 8px; margin-bottom: 10px; border: 1px solid #ddd; height: 300px; min-height: 300px; }
+        #map { height: 100%; width: 100%; transition: transform 0.1s linear; }
+        .btn-map-control { position: absolute; z-index: 1000; background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        .dms-container { display: flex; gap: 4px; align-items: center; }
+        .dms-container input { padding: 6px 4px; text-align: center; }
+        
+        /* JAKIM Checkbox Box Styling */
+        .jakim-box { background: #e3f2fd; padding: 12px; border-radius: 8px; border: 1px solid #bbdefb; margin-bottom: 10px; }
+        .jakim-label { font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; cursor: pointer; color: #0d47a1; margin: 0;}
+        .jakim-label input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; }
+        
+        /* Table Style */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; text-align: center; }
+        th { padding: 8px; color: #666; font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 12px 8px; font-weight: bold; color: var(--primary); font-size: 1.05rem; }
+
+        /* Custom Input styling for parameters */
+        .param-group { display:flex; align-items: center; gap:8px; font-size:0.85rem; font-weight:bold; }
+        .param-group select { width:auto; padding:4px 8px; font-weight:bold; }
+        .param-group input[type="number"] { width: 70px; padding:4px 8px; font-weight:bold; }
+
+        /* SVG Charts */
+        .diagram-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; align-items: center; position: relative; }
+        .svg-h { width: 300px; height: 300px; position: relative; }
+        .svg-v { width: 150px; height: 300px; }
+        .sun-status-text { text-align: center; font-size: 0.95rem; margin-top: -5px; margin-bottom: 15px; font-weight: bold;}
+
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; color: white; margin-top: 4px; }
+        .bg-gold { background: #ffb300; color: #000; }
+        .bg-blue { background: #3f51b5; }
+        .footer { text-align: center; font-size: 0.8rem; color: #777; padding: 20px; }
+
+        /* Planet Table specific styles */
+        .planet-table th { font-size: 0.75rem; background:#f3e5f5; }
+        .planet-table td { font-size: 0.95rem; border-bottom: 1px solid #eee; padding: 8px; }
+        
+        /* Qibla Compass specific styles */
+        #qibla-compass-container { transition: box-shadow 0.3s ease, border-color 0.3s ease; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 1.3rem; font-weight: bold;">Falak & Astronomi INSTUN</div>
+    <div style="font-size: 0.8rem; opacity: 0.9;">Ultimate Edition (Dedicated Qibla Compass)</div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <h2>📍 Lokasi & Masa</h2>
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <input type="text" id="poi-search" placeholder="Cari POI (Cth: KLCC, Kaabah)...">
+            <button class="btn btn-accent" style="flex: 0 0 80px;" onclick="searchPOI()">Cari</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-accent" onclick="getCurrentLocation()">📍 Guna GPS</button>
+            <button class="btn" onclick="setRealTime()">⏱️ Waktu Semasa</button>
+        </div>
+        
+        <div class="map-wrapper">
+            <div id="map"></div>
+            <button id="btn-map-rotate" class="btn-map-control" onclick="toggleMapRotation()" style="bottom: 50px; left: 10px; padding: 6px; font-size: 1.2rem; display:none;" title="Aktifkan Putaran Peta">🧭</button>
+            <div class="btn-map-control" style="bottom: 10px; left: 10px; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; background: rgba(255,255,255,0.9);">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:5px; margin:0;">
+                    <input type="checkbox" id="chk-qibla-line" onchange="updateQiblaLine()"> Garisan Kiblat
+                </label>
+            </div>
+        </div>
+
+        <div class="jakim-box">
+            <label class="jakim-label">
+                <input type="checkbox" id="chk-jakim" onchange="toggleJakim()"> 
+                <span>Gunakan Rujukan 59 Zon JAKIM</span>
+            </label>
+            <div id="jakim-selector" style="display: none; margin-top: 10px;">
+                <select id="sel-jakim" onchange="syncFromJakim()"></select>
+            </div>
+        </div>
+
+        <div class="grid-2 mt-2">
+            <div class="form-group">
+                <span class="label">Latitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lat-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lat-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lat-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lat-dir" onchange="syncDMS()"><option value="1">N</option><option value="-1">S</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Longitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lon-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lon-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lon-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lon-dir" onchange="syncDMS()"><option value="1">E</option><option value="-1">W</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Tarikh & Masa</span>
+                <input type="datetime-local" id="in-datetime" step="1" onchange="syncTime()">
+            </div>
+            <div class="form-group">
+                <span class="label">Zon Waktu (GMT/UTC)</span>
+                <input type="number" id="in-timezone" step="0.5" onchange="runCalculations()" placeholder="+8">
+            </div>
+            <div class="form-group">
+                <span class="label">Elevasi (Meter dpl)</span>
+                <input type="number" id="in-elev" value="0" onchange="runCalculations()">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🕌 Waktu Solat (Bisection) & Parameter</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 10px;">
+            <div class="param-group">
+                Subuh: 
+                <select id="sel-subuh" onchange="checkCustom('subuh')">
+                    <option value="12">12°</option><option value="15">15°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18" selected>18° (Default)</option>
+                    <option value="18.5">18.5°</option><option value="19">19°</option><option value="20">20° (JAKIM)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-subuh" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+            <div class="param-group">
+                Isyak: 
+                <select id="sel-isyak" onchange="checkCustom('isyak')">
+                    <option value="12">12°</option><option value="13">13°</option><option value="14">14°</option>
+                    <option value="15">15°</option><option value="16">16°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18" selected>18° (Default)</option>
+                    <option value="19">19°</option><option value="20">20° (JAKIM)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-isyak" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr><th>Subuh</th><th>Syuruk</th><th>Zohor</th><th>Asar</th><th>Maghrib</th><th>Isyak</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="p-subuh">-</td><td id="p-syuruk">-</td><td id="p-zohor">-</td>
+                        <td id="p-asar">-</td><td id="p-maghrib">-</td><td id="p-isyak">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🧭 Kompas Kiblat (Sensor Peranti)</h2>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-accent" id="btn-qibla-compass" onclick="startQiblaCompass()" style="width: auto; padding: 10px 20px;">Aktifkan Kompas Kiblat</button>
+        </div>
+        
+        <div id="qibla-compass-wrapper" style="display:none;">
+            <div id="qibla-compass-container" style="position: relative; width: 220px; height: 220px; margin: 0 auto; border-radius: 50%; border: 6px solid #333; background: white; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
+                <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-bottom: 20px solid red; z-index: 10;"></div>
+                
+                <div id="qibla-dial" style="position: absolute; width: 100%; height: 100%; transition: transform 0.1s linear;">
+                    <div style="position:absolute; top: 8px; left: 50%; transform: translateX(-50%); font-weight:bold; color:#666;">N</div>
+                    <div style="position:absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-weight:bold; color:#666;">S</div>
+                    <div style="position:absolute; top: 50%; right: 8px; transform: translateY(-50%); font-weight:bold; color:#666;">E</div>
+                    <div style="position:absolute; top: 50%; left: 8px; transform: translateY(-50%); font-weight:bold; color:#666;">W</div>
+                    
+                    <div id="qibla-pointer-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(0deg);">
+                        <div style="position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 4px; height: 35%; background: var(--qibla); border-radius: 2px;"></div>
+                        <div style="position: absolute; top: -5%; left: 50%; transform: translateX(-50%); font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🕋</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 25px; font-size: 0.9rem; font-weight: bold; color: #444;">
+                Arah Telefon: <span id="phone-heading" style="color:red;">0</span>° &nbsp;|&nbsp; Azimut Kiblat: <span id="qibla-target" style="color:var(--qibla);">0</span>°
+            </div>
+            <p style="text-align:center; font-size:0.75rem; color:#888; margin-top:5px;">Putar telefon sehingga jarum 🕋 sejajar dengan anak panah merah.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🌍 Pedoman Suria Visual (DMS)</h2>
+        <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
+        
+        <div class="diagram-container">
+            <div class="svg-h">
+                <button id="btn-compass-rotate" class="btn-map-control" onclick="toggleCompassRotation()" style="top: 0px; left: 0px; padding: 6px; font-size: 1.2rem; z-index:100; display:none;" title="Aktifkan Putaran Kompas">🧭</button>
+                <svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%; transition: transform 0.1s linear;"></svg>
+            </div>
+            <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
+        </div>
+
+        <div class="grid-data" style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <div><span class="label">Azimut Kiblat</span> <span id="dms-qibla" class="highlight">-</span></div>
+            <div><span class="label">Azimut Matahari</span> <span id="dms-sun-az">-</span></div>
+            <div><span class="label">Altitud Matahari</span> <span id="dms-sun-alt">-</span></div>
+            <div><span class="label">Arah Bayang</span> <span id="dms-shadow">-</span></div>
+            <div><span class="label">Azimut Bulan</span> <span id="dms-moon-az">-</span></div>
+            <div><span class="label">Altitud Bulan</span> <span id="dms-moon-alt">-</span></div>
+            <div style="grid-column: span 2; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 5px;">
+                <span class="label" style="color:var(--primary);">Waktu Bayang Kiblat Harian (Istiwa Kiblat)</span> 
+                <span id="qibla-shadow-time" style="font-weight: bold; font-size: 0.95rem;">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid gold;">
+        <h2>📸 Modul Astrofotografi (Pencahayaan)</h2>
+        <div style="font-family: 'Segoe UI', sans-serif; font-size: 0.95rem; font-weight: bold; color: #333; display: flex; flex-direction: column; gap: 8px; background: #fafafa; padding: 10px; border-radius: 6px;">
+            <div style="display: flex;"><div style="width: 170px;">Golden Hour (Pagi)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-gold-am">-</div><div style="color:#f57f17; font-weight:normal;">(Masa Emas)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Blue Hour (Pagi)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-blue-am">-</div><div style="color:#3f51b5; font-weight:normal;">(Cahaya Biru)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Golden Hour (Petang)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-gold-pm">-</div><div style="color:#f57f17; font-weight:normal;">(Masa Emas)</div></div>
+            <div style="display: flex;"><div style="width: 170px;">Blue Hour (Petang)</div><div style="width: 15px;">:</div><div style="width: 60px;" id="astro-blue-pm">-</div><div style="color:#3f51b5; font-weight:normal;">(Cahaya Biru)</div></div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--astro);">
+        <h2>🪐 Modul Kedudukan Planet (Ephemeris)</h2>
+        <div class="table-responsive">
+            <table class="planet-table">
+                <thead>
+                    <tr><th>Planet</th><th>Azimuth</th><th>Altitude</th></tr>
+                </thead>
+                <tbody id="planet-tbody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #333;">
+        <h2>🌠 Modul Supermoon, Dark Sky & Fenomena</h2>
+        <div class="grid-data">
+            <div>
+                <span class="label">Status Jarak Bulan</span>
+                <span id="res-moon-dist" style="font-weight:bold; color:var(--primary);">-</span>
+                <div id="res-moon-illu" style="font-size:0.8rem; color:#555;">-</div>
+            </div>
+            <div>
+                <span class="label">Tahap Pencemaran Cahaya</span>
+                <span id="res-darksky" style="font-weight:bold; color:#333;">-</span>
+            </div>
+            <div style="grid-column: span 2; border-top:1px solid #eee; padding-top:8px;">
+                <span class="label">Hujan Meteor Utama Bulanan</span>
+                <span id="meteor-list" style="font-size:0.85rem; color:#444; font-weight:bold;">-</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="footer">Falak & Astronomi INSTUN &copy; 2026</div>
+
+<script>
+    // --- PEMBOLEH UBAH GLOBAL ---
+    let userCoords = { lat: 3.1390, lon: 101.6869 };
+    let targetTime = new Date();
+    let map, marker, qiblaLine = null;
+    let isJakimMode = false;
+    let isMapRotating = false;
+    let isCompassRotating = false;
+
+    // Pangkalan Data JAKIM dipendekkan untuk paparan (kekalkan yang asal dalam kod sebenar anda)
+    const jakimZones = [
+    // JOHOR
+    { id: "JHR01", name: "JHR01: Pulau Aur, Pulau Pemanggil", lat: 2.44, lon: 104.52 },
+    { id: "JHR02", name: "JHR02: Johor Bahru, Kota Tinggi, Mersing, Kulai", lat: 1.49, lon: 103.73 },
+    { id: "JHR03", name: "JHR03: Kluang, Pontian", lat: 2.03, lon: 103.32 },
+    { id: "JHR04", name: "JHR04: Batu Pahat, Muar, Segamat, Gemas Johor, Tangkak", lat: 1.85, lon: 102.93 },
+    // KEDAH
+    { id: "KDH01", name: "KDH01: Kota Setar, Kubang Pasu, Pokok Sena", lat: 6.12, lon: 100.37 },
+    { id: "KDH02", name: "KDH02: Kuala Muda, Yan, Pendang", lat: 5.64, lon: 100.49 },
+    { id: "KDH03", name: "KDH03: Padang Terap, Sik", lat: 6.25, lon: 100.60 },
+    { id: "KDH04", name: "KDH04: Baling", lat: 5.67, lon: 100.92 },
+    { id: "KDH05", name: "KDH05: Bandar Baharu, Kulim", lat: 5.37, lon: 100.55 },
+    { id: "KDH06", name: "KDH06: Langkawi", lat: 6.33, lon: 99.80 },
+    { id: "KDH07", name: "KDH07: Puncak Gunung Jerai", lat: 5.80, lon: 100.43 },
+    // KELANTAN
+    { id: "KTN01", name: "KTN01: Kota Bharu, Bachok, Pasir Puteh, Tumpat, Pasir Mas, Tanah Merah, Machang, Kuala Krai, Jeli", lat: 6.13, lon: 102.24 },
+    { id: "KTN02", name: "KTN02: Gua Musang (Bertam, Galas), Jeli", lat: 4.88, lon: 101.96 },
+    // MELAKA
+    { id: "MLK01", name: "MLK01: Seluruh Negeri Melaka", lat: 2.19, lon: 102.25 },
+    // NEGERI SEMBILAN
+    { id: "NGS01", name: "NGS01: Tampin, Jempol", lat: 2.80, lon: 102.37 },
+    { id: "NGS02", name: "NGS02: Jelebu, Kuala Pilah, Rembau", lat: 2.73, lon: 101.94 },
+    { id: "NGS03", name: "NGS03: Port Dickson, Seremban", lat: 2.53, lon: 101.80 },
+    // PAHANG
+    { id: "PHG01", name: "PHG01: Pulau Tioman", lat: 2.81, lon: 104.16 },
+    { id: "PHG02", name: "PHG02: Kuantan, Pekan, Rompin, Muadzam Shah", lat: 3.82, lon: 103.33 },
+    { id: "PHG03", name: "PHG03: Jerantut, Temerloh, Maran, Bera, Chenor, Jengka", lat: 3.93, lon: 102.36 },
+    { id: "PHG04", name: "PHG04: Bentong, Lipis, Raub", lat: 3.52, lon: 101.90 },
+    { id: "PHG05", name: "PHG05: Genting Sempah, Janda Baik, Bukit Tinggi", lat: 3.35, lon: 101.78 },
+    { id: "PHG06", name: "PHG06: Cameron Highlands, Genting Highlands, Bukit Fraser", lat: 4.47, lon: 101.38 },
+    // PERAK
+    { id: "PRK01", name: "PRK01: Tapah, Slim River, Tanjung Malim", lat: 3.68, lon: 101.52 },
+    { id: "PRK02", name: "PRK02: Ipoh, Batu Gajah, Kampar, Sg. Siput, Kuala Kangsar", lat: 4.59, lon: 101.07 },
+    { id: "PRK03", name: "PRK03: Pengkalan Hulu, Grik, Lenggong", lat: 5.43, lon: 101.13 },
+    { id: "PRK04", name: "PRK04: Temengor, Belum", lat: 5.54, lon: 101.34 },
+    { id: "PRK05", name: "PRK05: Teluk Intan, Bagan Datuk, Kg. Gajah, Seri Iskandar, Beruas, Parit, Lumut, Sitiawan, Pulau Pangkor", lat: 4.03, lon: 101.02 },
+    { id: "PRK06", name: "PRK06: Selama, Taiping, Bagan Serai, Parit Buntar", lat: 4.85, lon: 100.74 },
+    { id: "PRK07", name: "PRK07: Bukit Larut", lat: 4.86, lon: 100.76 },
+    // PERLIS
+    { id: "PLS01", name: "PLS01: Seluruh Negeri Perlis", lat: 6.44, lon: 100.20 },
+    // PULAU PINANG
+    { id: "PNG01", name: "PNG01: Seluruh Negeri Pulau Pinang", lat: 5.41, lon: 100.33 },
+    // SELANGOR
+    { id: "SGR01", name: "SGR01: Gombak, Petaling, Sepang, Hulu Langat, Hulu Selangor, S.Alam", lat: 3.14, lon: 101.69 },
+    { id: "SGR02", name: "SGR02: Kuala Selangor, Sabak Bernam", lat: 3.34, lon: 101.25 },
+    { id: "SGR03", name: "SGR03: Klang, Kuala Langat", lat: 3.03, lon: 101.45 },
+    // TERENGGANU
+    { id: "TRG01", name: "TRG01: Kuala Terengganu, Marang, Kuala Nerus", lat: 5.33, lon: 103.14 },
+    { id: "TRG02", name: "TRG02: Besut, Setiu", lat: 5.73, lon: 102.49 },
+    { id: "TRG03", name: "TRG03: Hulu Terengganu", lat: 5.07, lon: 102.93 },
+    { id: "TRG04", name: "TRG04: Dungun, Kemaman", lat: 4.23, lon: 103.42 },
+    // WILAYAH PERSEKUTUAN
+    { id: "WLY01", name: "WLY01: Kuala Lumpur, Putrajaya", lat: 3.13, lon: 101.68 },
+    { id: "WLY02", name: "WLY02: Labuan", lat: 5.28, lon: 115.25 },
+    // SARAWAK
+    { id: "SWK01", name: "SWK01: Limbang, Lawas, Sundar, Trusan", lat: 4.75, lon: 115.01 },
+    { id: "SWK02", name: "SWK02: Miri, Niah, Bekenu, Sibuti, Marudi", lat: 4.40, lon: 114.00 },
+    { id: "SWK03", name: "SWK03: Pandan, Belaga, Suai, Tatau, Sebauh, Bintulu", lat: 3.17, lon: 113.04 },
+    { id: "SWK04", name: "SWK04: Sibu, Mukah, Dalat, Song, Igan, Oya, Balingian, Kanowit, Kapit", lat: 2.29, lon: 111.82 },
+    { id: "SWK05", name: "SWK05: Sarikei, Matu, Julau, Rajang, Daro, Bintangor, Belawai", lat: 2.12, lon: 111.52 },
+    { id: "SWK06", name: "SWK06: Lubok Antu, Sri Aman, Roban, Debak, Kabong, Lingga, Engkilili, Betong, Spaoh, Pusa, Saratok", lat: 1.23, lon: 111.53 },
+    { id: "SWK07", name: "SWK07: Serian, Pantu, Simunjan", lat: 1.17, lon: 110.56 },
+    { id: "SWK08", name: "SWK08: Kuching, Bau, Lundu, Sematan", lat: 1.55, lon: 110.35 },
+    { id: "SWK09", name: "SWK09: Zon Khas (Kampung Patarikan)", lat: 4.88, lon: 115.28 },
+    // SABAH
+    { id: "SBH01", name: "SBH01: Sandakan (Timur), Bukit Garam, Semawang, Temanggong, Tambisan, Bandar Sandakan", lat: 5.84, lon: 118.11 },
+    { id: "SBH02", name: "SBH02: Pinangah, Terusan, Beluran, Telupid, Kuamut", lat: 5.38, lon: 117.13 },
+    { id: "SBH03", name: "SBH03: Lahad Datu, Silabukan, Tungku, Sahabat, Semporna, Kunak", lat: 5.03, lon: 118.33 },
+    { id: "SBH04", name: "SBH04: Tawau, Balung, Merotai, Kalabakan", lat: 4.24, lon: 117.89 },
+    { id: "SBH05", name: "SBH05: Kudat, Kota Marudu, Pitas, Pulau Banggi", lat: 6.88, lon: 116.84 },
+    { id: "SBH06", name: "SBH06: Gunung Kinabalu", lat: 6.07, lon: 116.55 },
+    { id: "SBH07", name: "SBH07: Kota Kinabalu, Penampang, Tuaran, Papar, Ranau, Kota Belud", lat: 5.98, lon: 116.07 },
+    { id: "SBH08", name: "SBH08: Pensiangan, Keningau, Tambunan, Nabawan", lat: 5.33, lon: 116.16 },
+    { id: "SBH09", name: "SBH09: Beaufort, Kuala Penyu, Sipitang, Tenom, Long Pa Sia, Membakut, Weston", lat: 5.35, lon: 115.75 }
+];
+
         .map-overlay { position: absolute; z-index: 1000; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 4px; bottom: 10px; left: 10px; font-size: 0.8rem; font-weight: bold; border: 1px solid #ccc; }
 
         .dms-container { display: flex; gap: 4px; align-items: center; }
