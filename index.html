@@ -84,32 +84,692 @@
         <div id="map"></div>
 		
 		<div class="jakim-box" style="margin-top:10px;">
-        <!--<label class="jakim-label"> -->
-		<!--        <input type="checkbox" id="chk-qibla-line" onchange="toggleQiblaLine()"> -->
- 		<!--        <span>Papar Garisan Arah Kiblat</span> -->
- 		<!--</label> -->
       <label class="jakim-label">
-           <input type="checkbox" id="chk-greatcircle"
-                  onchange="updateAdvancedMapFeatures()">
+           <input type="checkbox" id="chk-greatcircle" onchange="updateAdvancedMapFeatures()">
            <span>🌍 Great Circle Kiblat Sebenar</span>
        </label>
    
-       <!-- <label class="jakim-label"> -->
-       <!--    <input type="checkbox" id="chk-arrow" -->
-       <!--          onchange="updateAdvancedMapFeatures()"> -->
-       <!--    <span>🧭 Anak Panah Kiblat Animasi</span> -->
-       <!-- </label> -->
-   
        <label class="jakim-label">
-           <input type="checkbox" id="chk-distance"
-                  onchange="updateAdvancedMapFeatures()">
+           <input type="checkbox" id="chk-distance" onchange="updateAdvancedMapFeatures()">
            <span>📏 Papar Jarak ke Kaabah</span>
        </label>
    
        <label class="jakim-label">
-           <input type="checkbox" id="chk-kaaba"
-                  onchange="updateAdvancedMapFeatures()">
+           <input type="checkbox" id="chk-kaaba" onchange="updateAdvancedMapFeatures()">
            <span>🕋 Papar Ikon Kaabah</span>
+       </label>
+   
+       <label class="jakim-label">
+           <input type="checkbox" id="chk-sun" onchange="updateAdvancedMapFeatures()">
+           <span>☀️ Arah Sunrise/Sunset</span>
+       </label>
+   
+       <label class="jakim-label">
+           <input type="checkbox" id="chk-moon" onchange="updateAdvancedMapFeatures()">
+           <span>🌙 Arah Moonrise/Moonset</span>
+       </label>
+   
+       <label class="jakim-label">
+           <input type="checkbox" id="chk-compass" onchange="toggleCompassSensor()">
+           <span>📱 Compass Sensor Telefon Live</span>
+       </label>
+		   
+		</div>
+
+        <div class="jakim-box">
+		
+            <label class="jakim-label">
+                <input type="checkbox" id="chk-jakim" onchange="toggleJakim()"> 
+                <span>Gunakan Rujukan 59 Zon JAKIM</span>
+            </label>
+			
+            <div id="jakim-selector" style="display: none; margin-top: 10px;">
+                <select id="sel-jakim" onchange="syncFromJakim()"></select>
+            </div>
+        </div>
+
+        <div class="grid-2 mt-2">
+            <div class="form-group">
+                <span class="label">Latitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lat-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lat-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lat-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lat-dir" onchange="syncDMS()"><option value="1">N</option><option value="-1">S</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Longitud (DMS)</span>
+                <div class="dms-container">
+                    <input type="number" id="lon-d" min="0" onchange="syncDMS()"><span>°</span>
+                    <input type="number" id="lon-m" min="0" max="59" onchange="syncDMS()"><span>'</span>
+                    <input type="number" id="lon-s" min="0" step="0.01" onchange="syncDMS()"><span>"</span>
+                    <select id="lon-dir" onchange="syncDMS()"><option value="1">E</option><option value="-1">W</option></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <span class="label">Tarikh & Masa</span>
+                <input type="datetime-local" id="in-datetime" step="1" onchange="syncTime()">
+            </div>
+            <div class="form-group">
+                <span class="label">Zon Masa (UTC Offset)</span>
+                <input type="number" id="in-tz" value="8" step="0.5" onchange="runCalculations()">
+            </div>
+            <div class="form-group">
+                <span class="label">Elevasi (Meter dpl)</span>
+                <input type="number" id="in-elev" value="0" onchange="runCalculations()">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🕌 Waktu Solat (Bisection) & Parameter</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 10px;">
+            <div class="param-group">
+                Subuh: 
+                <select id="sel-subuh" onchange="checkCustom('subuh')">
+                    <option value="12">12°</option><option value="15">15°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18" selected>18° (Default)</option>
+                    <option value="18.5">18.5°</option><option value="19">19°</option><option value="20">20° (JAKIM)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-subuh" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+            <div class="param-group">
+                Isyak: 
+                <select id="sel-isyak" onchange="checkCustom('isyak')">
+                    <option value="12">12°</option><option value="13">13°</option><option value="14">14°</option>
+                    <option value="15">15°</option><option value="16">16°</option><option value="17">17°</option>
+                    <option value="17.5">17.5°</option><option value="18" selected>18° (Default)</option>
+                    <option value="19">19°</option><option value="20">20° (JAKIM)</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" id="cust-isyak" style="display:none;" placeholder="°" step="0.1" onchange="runCalculations()">
+            </div>
+            <div class="param-group">
+                Calculation:
+                <select id="calc-method" onchange="applyCalculationMethod()">
+                    <option value="malaysia" selected>Malaysia JAKIM (Default)</option>
+                    <option value="mwl">Muslim World League</option>
+                    <option value="ummalqura">Umm al-Qura, Makkah</option>
+                    <option value="isna">ISNA</option>
+                    <option value="egypt">Egyptian General Authority</option>
+                    <option value="karachi">Karachi</option>
+                    <option value="tehran">University of Tehran</option>
+                    <option value="jafari">Shia Ithna Ashari (Jafari)</option>
+                </select>
+            </div>
+            
+            <div class="param-group">
+                Asar:
+                <select id="asr-method" onchange="runCalculations()">
+                    <option value="standard" selected>Standard</option>
+                    <option value="hanafi">Hanafi</option>
+                </select>
+            </div>
+            
+            <div class="param-group">
+                High Latitude:
+                <select id="highlat-method" onchange="runCalculations()">
+                    <option value="none" selected>None</option>
+                    <option value="middle">Middle Night</option>
+                    <option value="oneseventh">One-Seventh</option>
+                    <option value="angle">Angle Based</option>
+                    <option value="nearest">Nearest Latitude</option>
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr><th>Subuh</th><th>Syuruk</th><th>Zohor</th><th>Asar</th><th>Maghrib</th><th>Isyak</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="p-subuh">-</td><td id="p-syuruk">-</td><td id="p-zohor">-</td>
+                        <td id="p-asar">-</td><td id="p-maghrib">-</td><td id="p-isyak">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🌍 Pedoman Suria Visual (DMS)</h2>
+        <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
+        
+        <div class="diagram-container">
+            <div class="svg-h"><svg viewBox="0 0 320 320" id="svg-horizontal" style="width:100%;height:100%;"></svg></div>
+            <div class="svg-v"><svg viewBox="0 0 160 320" id="svg-vertical" style="width:100%;height:100%;"></svg></div>
+        </div>
+
+        <div class="grid-data" style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <div><span class="label">Azimut Kiblat</span> <span id="dms-qibla" class="highlight">-</span></div>
+            <div><span class="label">Azimut Matahari</span> <span id="dms-sun-az">-</span></div>
+            <div><span class="label">Altitud Matahari</span> <span id="dms-sun-alt">-</span></div>
+            <div><span class="label">Arah Bayang</span> <span id="dms-shadow">-</span></div>
+            <div><span class="label">Azimut Bulan</span> <span id="dms-moon-az">-</span></div>
+            <div><span class="label">Altitud Bulan</span> <span id="dms-moon-alt">-</span></div>
+            <div style="grid-column: span 2; border-top: 1px solid #ddd; padding-top: 8px; margin-top: 5px;">
+                <span class="label" style="color:var(--primary);">Waktu Bayang Kiblat Harian (Istiwa Kiblat)</span> 
+                <span id="qibla-shadow-time" style="font-weight: bold; font-size: 0.95rem;">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid gold;">
+        <h2>📸 Modul Astrofotografi (Pencahayaan)</h2>
+        <div class="grid-data">
+            <div><span class="label">Golden Hour (Pagi)</span><span id="astro-gold-am">-</span><div class="badge bg-gold">Masa Emas</div></div>
+            <div><span class="label">Blue Hour (Pagi)</span><span id="astro-blue-am">-</span><div class="badge bg-blue">Cahaya Biru</div></div>
+            <div><span class="label">Golden Hour (Petang)</span><span id="astro-gold-pm">-</span><div class="badge bg-gold">Masa Emas</div></div>
+            <div><span class="label">Blue Hour (Petang)</span><span id="astro-blue-pm">-</span><div class="badge bg-blue">Cahaya Biru</div></div>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--astro);">
+        <h2>🪐 Modul Kedudukan Planet (Ephemeris)</h2>
+        <div class="grid-data" id="planet-data" style="background:#f3e5f5; padding:10px; border-radius:8px;"></div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #333;">
+        <h2>🌠 Modul Supermoon, Dark Sky & Fenomena</h2>
+        <div class="grid-data">
+            <div>
+                <span class="label">Status Jarak Bulan</span>
+                <span id="res-moon-dist" style="font-weight:bold; color:var(--primary);">-</span>
+                <div id="res-moon-illu" style="font-size:0.8rem; color:#555;">-</div>
+            </div>
+            <div>
+                <span class="label">Tahap Pencemaran Cahaya</span>
+                <span id="res-darksky" style="font-weight:bold; color:#333;">-</span>
+            </div>
+            <div style="grid-column: span 2; border-top:1px solid #eee; padding-top:8px;">
+                <span class="label">Hujan Meteor Utama Bulanan</span>
+                <span id="meteor-list" style="font-size:0.85rem; color:#444; font-weight:bold;">-</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="footer">Falak & Astro Pro V1.8 &copy; 2024</div>
+
+<script>
+    // --- PEMBOLEH UBAH GLOBAL ---
+    let userCoords = { lat: 3.1390, lon: 101.6869 };
+    let targetTime = new Date();
+    let map, marker, isJakimMode = false;
+    let qiblaGreatCircle = null;
+    let kaabaMarker = null;
+    let sunLine = null;
+    let moonLine = null;
+    let qiblaArrow = null;
+
+    const jakimZones = [
+        { id: "JHR01", name: "JHR01: Pulau Aur & Pulau Pemanggil", lat: 2.58, lon: 104.32 },
+        { id: "JHR02", name: "JHR02: Johor Bahru, Kota Tinggi, Mersing, Kulai", lat: 1.72, lon: 103.53 },
+        { id: "JHR03", name: "JHR03: Kluang, Pontian", lat: 1.65, lon: 103.20 },
+        { id: "JHR04", name: "JHR04: Batu Pahat, Muar, Segamat, Tangkak", lat: 2.27, lon: 102.53 },
+        { id: "KDH01", name: "KDH01: Kota Setar, Kubang Pasu, Pokok Sena", lat: 6.28, lon: 100.22 },
+        { id: "KDH02", name: "KDH02: Kuala Muda, Yan, Pendang", lat: 5.67, lon: 100.48 },
+        { id: "KDH03", name: "KDH03: Padang Terap, Sik", lat: 6.25, lon: 100.62 },
+        { id: "KDH04", name: "KDH04: Baling", lat: 5.68, lon: 100.92 },
+        { id: "KDH05", name: "KDH05: Bandar Baharu, Kulim", lat: 5.37, lon: 100.55 },
+        { id: "KDH06", name: "KDH06: Langkawi", lat: 6.33, lon: 99.85 },
+        { id: "KDH07", name: "KDH07: Gunung Jerai", lat: 5.78, lon: 100.43 },
+        { id: "KTN01", name: "KTN01: Kota Bharu, Bachok, Pasir Mas", lat: 6.02, lon: 102.25 },
+        { id: "KTN02", name: "KTN02: Gua Musang, Jeli, Lojing", lat: 4.95, lon: 101.50 },
+        { id: "MLK01", name: "MLK01: Seluruh Melaka", lat: 2.38, lon: 102.23 },
+        { id: "NGS01", name: "NGS01: Tampin, Jempol", lat: 2.90, lon: 102.32 },
+        { id: "NGS02", name: "NGS02: Jelebu, Kuala Pilah, Rembau", lat: 2.53, lon: 101.80 },
+        { id: "NGS03", name: "NGS03: Port Dickson, Seremban", lat: 2.72, lon: 101.94 },
+        { id: "PHG01", name: "PHG01: Pulau Tioman", lat: 2.80, lon: 104.15 },
+        { id: "PHG02", name: "PHG02: Kuantan, Pekan, Rompin", lat: 3.82, lon: 103.33 },
+        { id: "PHG03", name: "PHG03: Jerantut, Temerloh, Maran", lat: 3.47, lon: 102.42 },
+        { id: "PHG04", name: "PHG04: Bentong, Lipis, Raub", lat: 3.97, lon: 101.93 },
+        { id: "PHG05", name: "PHG05: Genting Sempah, Janda Baik", lat: 3.38, lon: 101.78 },
+        { id: "PHG06", name: "PHG06: Cameron Highlands, Bukit Fraser", lat: 4.47, lon: 101.38 },
+        { id: "PRK01", name: "PRK01: Tapah, Slim River, Tanjung Malim", lat: 3.98, lon: 101.52 },
+        { id: "PRK02", name: "PRK02: Ipoh, Batu Gajah, Kampar", lat: 4.60, lon: 101.08 },
+        { id: "PRK03", name: "PRK03: Lenggong, Pengkalan Hulu, Grik", lat: 5.13, lon: 100.98 },
+        { id: "PRK04", name: "PRK04: Temengor, Belum", lat: 5.58, lon: 101.38 },
+        { id: "PRK05", name: "PRK05: Teluk Intan, Lumut, Pangkor", lat: 4.23, lon: 100.63 },
+        { id: "PRK06", name: "PRK06: Selama, Taiping, Parit Buntar", lat: 5.13, lon: 100.73 },
+        { id: "PRK07", name: "PRK07: Bukit Larut", lat: 4.87, lon: 100.80 },
+        { id: "PLS01", name: "PLS01: Kangar, Arau, Padang Besar", lat: 6.43, lon: 100.20 },
+        { id: "PNG01", name: "PNG01: Seluruh Pulau Pinang", lat: 5.42, lon: 100.33 },
+        { id: "SBH01", name: "SBH01: Sandakan Timur", lat: 5.50, lon: 118.00 },
+        { id: "SBH02", name: "SBH02: Beluran, Telupid, Sandakan Barat", lat: 5.52, lon: 117.12 },
+        { id: "SBH03", name: "SBH03: Lahad Datu, Semporna, Kunak", lat: 5.03, lon: 118.33 },
+        { id: "SBH04", name: "SBH04: Tawau, Balong, Kalabakan", lat: 4.25, lon: 117.88 },
+        { id: "SBH05", name: "SBH05: Kudat, Kota Marudu, Pulau Banggi", lat: 6.88, lon: 116.83 },
+        { id: "SBH06", name: "SBH06: Gunung Kinabalu", lat: 6.08, lon: 116.55 },
+        { id: "SBH07", name: "SBH07: Kota Kinabalu, Ranau, Kota Belud", lat: 5.98, lon: 116.07 },
+        { id: "SBH08", name: "SBH08: Keningau, Tambunan, Nabawan", lat: 5.33, lon: 116.17 },
+        { id: "SBH09", name: "SBH09: Beaufort, Sipitang, Tenom", lat: 5.08, lon: 115.55 },
+        { id: "SWK01", name: "SWK01: Limbang, Lawas, Sundar, Trusan", lat: 4.75, lon: 115.00 },
+        { id: "SWK02", name: "SWK02: Miri, Niah, Marudi", lat: 4.40, lon: 113.98 },
+        { id: "SWK03", name: "SWK03: Bintulu, Belaga, Tatau", lat: 3.17, lon: 113.03 },
+        { id: "SWK04", name: "SWK04: Sibu, Kapit, Song", lat: 2.30, lon: 111.82 },
+        { id: "SWK05", name: "SWK05: Sarikei, Julau, Rajang", lat: 2.12, lon: 111.52 },
+        { id: "SWK06", name: "SWK06: Sri Aman, Lubok Antu", lat: 1.23, lon: 111.47 },
+        { id: "SWK07", name: "SWK07: Betong, Saratok, Spaoh", lat: 1.42, lon: 111.53 },
+        { id: "SWK08", name: "SWK08: Kuching, Bau, Lundu", lat: 1.55, lon: 110.35 },
+        { id: "SWK09", name: "SWK09: Samarahan, Serian, Simunjan", lat: 1.47, lon: 110.48 },
+        { id: "SGR01", name: "SGR01: Gombak, Petaling, Sepang, Hulu Langat", lat: 3.14, lon: 101.69 },
+        { id: "SGR02", name: "SGR02: Kuala Selangor, Sabak Bernam", lat: 3.77, lon: 100.98 },
+        { id: "SGR03", name: "SGR03: Klang, Kuala Langat", lat: 2.99, lon: 101.40 },
+        { id: "TRG01", name: "TRG01: Kuala Terengganu, Marang", lat: 5.33, lon: 103.14 },
+        { id: "TRG02", name: "TRG02: Besut, Setiu", lat: 5.75, lon: 102.50 },
+        { id: "TRG03", name: "TRG03: Hulu Terengganu", lat: 5.00, lon: 102.53 },
+        { id: "TRG04", name: "TRG04: Dungun, Kemaman", lat: 4.23, lon: 103.42 },
+        { id: "WLY01", name: "WLY01: Kuala Lumpur & Putrajaya", lat: 3.14, lon: 101.69 },
+        { id: "WLY02", name: "WLY02: Labuan", lat: 5.28, lon: 115.24 }
+    ];
+	
+    window.onload = () => {
+        populateJakim(); initMap(); drawCompassFace(); drawVerticalFace();
+        updateUI(); runCalculations();
+        setTimeout(() => getCurrentLocation(true), 1000);
+    };
+
+    // --- LOKASI & PETA ---
+    function initMap() {
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+
+        map = L.map('map', {
+            center: [userCoords.lat, userCoords.lon],
+            zoom: 10,
+            layers: [osm]
+        });
+
+        const baseLayers = { "Standard": osm, "Satellite": satellite };
+        L.control.layers(baseLayers).addTo(map);
+
+        marker = L.marker([userCoords.lat, userCoords.lon]).addTo(map);
+
+        map.on('click', e => { 
+            if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
+            userCoords.lat = e.latlng.lat; userCoords.lon = e.latlng.lng; 
+            marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin
+            detectTimezone(userCoords.lat, userCoords.lon);
+            detectElevation(userCoords.lat, userCoords.lon);
+            updateUI(false); runCalculations(); 
+        });
+    }
+
+    function detectTimezone(lat, lon) {
+        try {
+            const tzName = tzlookup(lat, lon);
+            const now = new Date();
+            const formatter = new Intl.DateTimeFormat('en-US', { timeZone: tzName, timeZoneName: 'shortOffset' });
+            const parts = formatter.formatToParts(now);
+            const tzPart = parts.find(p => p.type === 'timeZoneName');
+            let offsetStr = tzPart.value;
+            let tz = 0;
+            const match = offsetStr.match(/GMT([+-])(\d+)(?::(\d+))?/);
+            if(match) {
+                const sign = match[1] === '-' ? -1 : 1;
+                const hours = parseInt(match[2]);
+                const minutes = parseInt(match[3] || 0);
+                tz = sign * (hours + minutes / 60);
+            }
+            document.getElementById('in-tz').value = tz;
+            window.currentTimezone = tzName;
+        } catch(err) {
+            document.getElementById('in-tz').value = Math.round(lon / 15);
+        }
+    }
+	
+    async function detectElevation(lat, lon) {
+        try {
+            const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if(data.results && data.results.length > 0) {
+                const elev = Math.round(data.results[0].elevation);
+                document.getElementById('in-elev').value = elev;
+            }
+        } catch(err) {
+            console.log("Elevation detection failed:", err);
+        }
+    }
+
+    async function searchPOI() {
+        let q = document.getElementById('poi-search').value;
+        if(!q) return;
+        let res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`);
+        let data = await res.json();
+        if(data[0]) { 
+            if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
+            userCoords.lat = parseFloat(data[0].lat); userCoords.lon = parseFloat(data[0].lon); 
+            marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin daripada Carian POI
+            detectTimezone(userCoords.lat, userCoords.lon);
+            detectElevation(userCoords.lat, userCoords.lon);
+            updateUI(); runCalculations(); 
+        } else alert("Lokasi tidak dijumpai.");
+    }
+
+    function getCurrentLocation(silent=false) {
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
+                userCoords.lat = p.coords.latitude; userCoords.lon = p.coords.longitude;
+                marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin daripada GPS
+                detectTimezone(userCoords.lat, userCoords.lon);
+                detectElevation(userCoords.lat, userCoords.lon);
+                targetTime = new Date(); updateUI(); runCalculations();
+            }, e => { if(!silent) alert("Akses GPS disekat."); });
+        }
+    }
+
+    function updateAdvancedMapFeatures() {
+        const kaaba = { lat: 21.422487, lon: 39.826206 };
+    
+        if(document.getElementById('chk-greatcircle').checked) {
+            if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
+            qiblaGreatCircle = L.polyline([[userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]], { color: 'blue', weight: 2, opacity: 0.7 }).addTo(map);
+        } else {
+            if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
+        }
+    
+        if(document.getElementById('chk-kaaba').checked) {
+            if(!kaabaMarker) {
+                kaabaMarker = L.marker([kaaba.lat, kaaba.lon]).addTo(map);
+                kaabaMarker.bindPopup("🕋 Kaabah");
+            }
+        } else {
+            if(kaabaMarker) { map.removeLayer(kaabaMarker); kaabaMarker = null; }
+        }
+    
+        if(document.getElementById('chk-sun').checked) {
+            const sPos = SunCalc.getPosition(targetTime, userCoords.lat, userCoords.lon);
+            const sAz = (sPos.azimuth * 180 / Math.PI + 180) % 360;
+            drawBearingLine(sAz, 'orange', 'sun');
+        } else {
+            if(sunLine) map.removeLayer(sunLine);
+        }
+    
+        if(document.getElementById('chk-moon').checked) {
+            const mPos = SunCalc.getMoonPosition(targetTime, userCoords.lat, userCoords.lon);
+            const mAz = (mPos.azimuth * 180 / Math.PI + 180) % 360;
+            drawBearingLine(mAz, 'gray', 'moon');
+        } else {
+            if(moonLine) map.removeLayer(moonLine);
+        }
+    
+        if(document.getElementById('chk-distance').checked) {
+            const dist = map.distance([userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]) / 1000;
+            marker.bindPopup(`📏 Jarak ke Kaabah:<br><b>${dist.toFixed(1)} km</b>`).openPopup();
+        } else {
+            marker.closePopup();
+        }
+    }
+
+    function drawBearingLine(azimuth, color, type) {
+        const distance = 500000;
+        const rad = azimuth * Math.PI / 180;
+        const lat2 = userCoords.lat + (distance / 111320) * Math.cos(rad);
+        const lon2 = userCoords.lon + (distance / (111320 * Math.cos(userCoords.lat * Math.PI/180))) * Math.sin(rad);
+        const line = L.polyline([[userCoords.lat, userCoords.lon], [lat2, lon2]], { color: color, dashArray: '5,5' }).addTo(map);
+    
+        if(type === 'sun') { if(sunLine) map.removeLayer(sunLine); sunLine = line; }
+        if(type === 'moon') { if(moonLine) map.removeLayer(moonLine); moonLine = line; }
+    }
+
+    function toggleCompassSensor() {
+        if(!document.getElementById('chk-compass').checked) return;
+        if(window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', function(event) {
+                const heading = event.alpha || 0;
+                if(qiblaArrow) {
+                    const arrow = qiblaArrow.getElement();
+                    if(arrow) { arrow.style.transform = `rotate(${heading}deg)`; }
+                }
+            });
+        }
+    }
+
+    // --- UI PENYEGERAKAN ---
+    function populateJakim() {
+        let sel = document.getElementById('sel-jakim');
+        jakimZones.forEach(z => { sel.innerHTML += `<option value="${z.id}" ${z.id==="WLY01"?"selected":""}>${z.name}</option>`; });
+    }
+    
+    function toggleJakim() {
+        isJakimMode = document.getElementById('chk-jakim').checked;
+        document.getElementById('jakim-selector').style.display = isJakimMode ? 'block' : 'none';
+        ['lat-d','lat-m','lat-s','lat-dir','lon-d','lon-m','lon-s','lon-dir'].forEach(id => document.getElementById(id).disabled = isJakimMode);
+        if(isJakimMode) {
+            document.getElementById('in-tz').value = 8;
+            syncFromJakim();
+        }
+    }
+    
+    function syncFromJakim() {
+        let z = jakimZones.find(x => x.id === document.getElementById('sel-jakim').value);
+        if(z) { 
+            userCoords.lat = z.lat; userCoords.lon = z.lon; 
+            marker.setLatLng([userCoords.lat, userCoords.lon]); // Pin bergerak jika pilih zon JAKIM
+            updateUI(); runCalculations(); 
+        }
+    }
+
+    function checkCustom(type) {
+        let sel = document.getElementById('sel-' + type);
+        let cust = document.getElementById('cust-' + type);
+        cust.style.display = (sel.value === 'custom') ? 'inline-block' : 'none';
+        runCalculations();
+	}	
+
+    function applyCalculationMethod() {
+        const method = document.getElementById('calc-method').value;
+        let fajr = 18; let isha = 18;
+    
+        switch(method) {
+            case 'malaysia': fajr = 18; isha = 18; break;
+            case 'mwl': fajr = 18; isha = 17; break;
+            case 'ummalqura': fajr = 18; isha = 90; break;
+            case 'isna': fajr = 15; isha = 15; break;
+            case 'egypt': fajr = 19.5; isha = 17.5; break;
+            case 'karachi': fajr = 18; isha = 18; break;
+            case 'tehran': fajr = 17.7; isha = 14; break;
+            case 'jafari': fajr = 16; isha = 14; break;
+        }
+        document.getElementById('sel-subuh').value = fajr;
+        document.getElementById('sel-isyak').value = isha;
+        runCalculations();
+    }
+
+    function updateUI(recenterMap = true) {
+        const toObj = deg => { let a = Math.abs(deg), d = Math.floor(a), m = Math.floor((a-d)*60); return {d:d, m:m, s:((a-d)*60-m)*60, dir:deg>=0?1:-1}; };
+        let latD = toObj(userCoords.lat), lonD = toObj(userCoords.lon);
+        
+        document.getElementById('lat-d').value = latD.d; document.getElementById('lat-m').value = latD.m; document.getElementById('lat-s').value = latD.s.toFixed(2); document.getElementById('lat-dir').value = latD.dir;
+        document.getElementById('lon-d').value = lonD.d; document.getElementById('lon-m').value = lonD.m; document.getElementById('lon-s').value = lonD.s.toFixed(2); document.getElementById('lon-dir').value = lonD.dir;
+        
+        let local = new Date(targetTime.getTime() - (targetTime.getTimezoneOffset() * 60000)).toISOString().slice(0,19);
+        document.getElementById('in-datetime').value = local;
+        
+        if (recenterMap && map) {
+            map.setView([userCoords.lat, userCoords.lon], 15);
+        }
+    }
+
+    function syncDMS() {
+        const toDd = (d,m,s,dir) => (parseFloat(d||0) + parseFloat(m||0)/60 + parseFloat(s||0)/3600) * parseFloat(dir);
+        userCoords.lat = toDd(document.getElementById('lat-d').value, document.getElementById('lat-m').value, document.getElementById('lat-s').value, document.getElementById('lat-dir').value);
+        userCoords.lon = toDd(document.getElementById('lon-d').value, document.getElementById('lon-m').value, document.getElementById('lon-s').value, document.getElementById('lon-dir').value);
+        marker.setLatLng([userCoords.lat, userCoords.lon]); // Pin bergerak jika koordinat DMS diubah manual
+        detectTimezone(userCoords.lat, userCoords.lon);
+        detectElevation(userCoords.lat, userCoords.lon);
+        updateUI(false); runCalculations();
+    }
+
+    function syncTime() { targetTime = new Date(document.getElementById('in-datetime').value); runCalculations(); }
+    function setRealTime() { targetTime = new Date(); updateUI(); runCalculations(); }
+    function fmtDMS(deg) { let a=Math.abs(deg), d=Math.floor(a), m=Math.floor((a-d)*60), s=((a-d)*60-m)*60; return `${deg<0?'-':''}${d}° ${m.toString().padStart(2,'0')}' ${s.toFixed(2).padStart(5,'0')}"`; }
+    
+    const fmtT = d => {
+        if (!d || isNaN(d.getTime())) return "--:--:--";
+        let tzOffset = parseFloat(document.getElementById('in-tz').value) || 0;
+        let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        let nd = new Date(utc + (3600000 * tzOffset));
+        return nd.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+    };
+
+    // --- LUKIS SVG ---
+    function drawCompassFace() {
+        const svg = document.getElementById('svg-horizontal'); let h = `<circle cx="160" cy="160" r="140" stroke="#444" fill="white" stroke-width="2"/>`;
+        for(let i=0; i<360; i+=10) {
+            let mj = i%30===0, rad = (i-90)*Math.PI/180;
+            h += `<line x1="${160+(mj?125:132)*Math.cos(rad)}" y1="${160+(mj?125:132)*Math.sin(rad)}" x2="${160+140*Math.cos(rad)}" y2="${160+140*Math.sin(rad)}" stroke="#666" stroke-width="${mj?2:1}"/>`;
+            if(mj && i%90!==0) h += `<text x="${160+112*Math.cos(rad)}" y="${164+112*Math.sin(rad)}" text-anchor="middle" font-size="10" fill="#888">${i}°</text>`;
+        }
+        // PEMBETULAN: Huruf N, S, W, E diletakkan di luar bulatan (jejari di luar r=140)
+        h += `<text x="160" y="15" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">N</text><text x="160" y="318" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">S</text><text x="10" y="167" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">W</text><text x="310" y="167" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">E</text><line x1="160" y1="160" x2="160" y2="40" stroke="#ccc" stroke-dasharray="4,4" /><g id="h-dyn"></g>`;
+        svg.innerHTML = h;
+    }
+
+    function drawVerticalFace() {
+        const svg = document.getElementById('svg-vertical');
+        let v = `<rect x="0" y="0" width="150" height="320" fill="#fdfdfd" rx="8"/><text x="70" y="20" text-anchor="middle" font-size="12" fill="#666">Zenith (+90°)</text><text x="70" y="310" text-anchor="middle" font-size="12" fill="#666">Nadir (-90°)</text><text x="145" y="155" text-anchor="end" font-size="12" font-weight="bold">Ufuk (0°)</text><path d="M 15 30 A 130 130 0 0 1 15 290" fill="none" stroke="#444" stroke-width="2"/><line x1="15" y1="30" x2="15" y2="290" stroke="#444" stroke-dasharray="2,2"/><line x1="15" y1="160" x2="150" y2="160" stroke="#444" stroke-width="2"/>`;
+        for(let i=-90; i<=90; i+=10) {
+            let mj = i%30===0, r = -i*Math.PI/180;
+            v += `<line x1="${15+(mj?122:126)*Math.cos(r)}" y1="${160+(mj?122:126)*Math.sin(r)}" x2="${15+130*Math.cos(r)}" y2="${160+130*Math.sin(r)}" stroke="#666" stroke-width="${mj?2:1}"/>`;
+            if(mj && i!==0 && Math.abs(i)!==90) v += `<text x="${15+110*Math.cos(r)}" y="${164+110*Math.sin(r)}" text-anchor="middle" font-size="10" fill="#888">${Math.abs(i)}°</text>`;
+        }
+        v += `<g id="v-dyn"></g>`; svg.innerHTML = v;
+    }
+
+    function findTimeByAlt(date, lat, lon, targetAltDeg, isMorning) {
+        let tAlt = targetAltDeg * Math.PI/180, noon = SunCalc.getTimes(date, lat, lon).solarNoon.getTime();
+        let left = noon + (isMorning?-12:0)*3600000, right = noon + (isMorning?0:12)*3600000;
+        if (tAlt > SunCalc.getPosition(new Date(noon), lat, lon).altitude) return null;
+        for(let i=0; i<40; i++) {
+            let mid = (left+right)/2, alt = SunCalc.getPosition(new Date(mid), lat, lon).altitude;
+            if(isMorning) { if(alt<tAlt) left=mid; else right=mid; } else { if(alt<tAlt) right=mid; else left=mid; }
+        }
+        return new Date((left+right)/2);
+    }
+
+    // --- KIRAAN UTAMA ---
+    function runCalculations() {
+        if (!targetTime || isNaN(targetTime.getTime())) return;
+        
+        const lat = userCoords.lat, lon = userCoords.lon, elev = parseFloat(document.getElementById('in-elev').value) || 0;
+        const tz = parseFloat(document.getElementById('in-tz').value) || 0;
+
+        // 1. KIBLAT
+        const kaaba = { lat: 21.422487, lon: 39.826206 }, dLon = (kaaba.lon - lon)*Math.PI/180;
+        const y = Math.sin(dLon), x = Math.cos(lat*Math.PI/180)*Math.tan(kaaba.lat*Math.PI/180) - Math.sin(lat*Math.PI/180)*Math.cos(dLon);
+        const qAz = (Math.atan2(y, x)*180/Math.PI + 360)%360;
+        document.getElementById('dms-qibla').innerText = fmtDMS(qAz);
+
+        // 2. MATAHARI & BULAN
+        const sPos = SunCalc.getPosition(targetTime, lat, lon), mPos = SunCalc.getMoonPosition(targetTime, lat, lon);
+        const sAz = (sPos.azimuth*180/Math.PI + 180)%360, sAlt = sPos.altitude*180/Math.PI, shAz = (sAz+180)%360;
+        const mAz = (mPos.azimuth*180/Math.PI + 180)%360, mAlt = mPos.altitude*180/Math.PI;
+        
+        document.getElementById('dms-sun-az').innerText = fmtDMS(sAz); document.getElementById('dms-sun-alt').innerText = fmtDMS(sAlt);
+        document.getElementById('dms-shadow').innerText = fmtDMS(shAz);
+        document.getElementById('dms-moon-az').innerText = fmtDMS(mAz); document.getElementById('dms-moon-alt').innerText = fmtDMS(mAlt);
+        document.getElementById('sun-status-text').innerHTML = sAlt > 0 ? `<span style="color:var(--accent)">☀️ Matahari di ufuk. Ada bayang.</span>` : `<span style="color:var(--primary)">🌌 Matahari tiada.</span>`;
+
+        // 3. SVG UPDATE
+        const hDyn = document.getElementById('h-dyn'), cx=160, rQ=(qAz-90)*Math.PI/180, rS=(sAz-90)*Math.PI/180, rM=(mAz-90)*Math.PI/180, rSh=(shAz-90)*Math.PI/180;
+        hDyn.innerHTML = `<line x1="${cx}" y1="${cx}" x2="${cx+120*Math.cos(rQ)}" y2="${cx+120*Math.sin(rQ)}" stroke="var(--qibla)" stroke-width="3"/><text x="${cx+135*Math.cos(rQ)}" y="${cx+135*Math.sin(rQ)+5}" font-size="16">🕋</text><line x1="${cx}" y1="${cx}" x2="${cx+100*Math.cos(rS)}" y2="${cx+100*Math.sin(rS)}" stroke="var(--sun)" stroke-width="3"/><text x="${cx+115*Math.cos(rS)}" y="${cx+115*Math.sin(rS)+5}" font-size="20">☀️</text><line x1="${cx}" y1="${cx}" x2="${cx+85*Math.cos(rM)}" y2="${cx+85*Math.sin(rM)}" stroke="var(--moon)" stroke-width="2" stroke-dasharray="3,2"/><text x="${cx+100*Math.cos(rM)}" y="${cx+100*Math.sin(rM)+5}" font-size="16">🌙</text><line x1="${cx}" y1="${cx}" x2="${cx+140*Math.cos(rSh)}" y2="${cx+140*Math.sin(rSh)}" stroke="var(--shadow)" stroke-width="2"/>`;
+        const vDyn = document.getElementById('v-dyn'), vc=15, vrS=-Math.max(-90,Math.min(90,sAlt))*Math.PI/180, vrM=-Math.max(-90,Math.min(90,mAlt))*Math.PI/180;
+        vDyn.innerHTML = `<line x1="${vc}" y1="160" x2="${vc+130*Math.cos(vrS)}" y2="${160+130*Math.sin(vrS)}" stroke="var(--sun)" stroke-width="2"/><circle cx="${vc+130*Math.cos(vrS)}" cy="${160+130*Math.sin(vrS)}" r="6" fill="var(--sun)"/><text x="${vc+140*Math.cos(vrS)}" y="${160+130*Math.sin(vrS)+5}" font-size="16">☀️</text><line x1="${vc}" y1="160" x2="${vc+130*Math.cos(vrM)}" y2="${160+130*Math.sin(vrM)}" stroke="var(--moon)" stroke-dasharray="2,2"/><circle cx="${vc+130*Math.cos(vrM)}" cy="${160+130*Math.sin(vrM)}" r="5" fill="var(--moon)"/><text x="${vc+140*Math.cos(vrM)}" y="${160+130*Math.sin(vrM)+5}" font-size="14">🌙</text>`;
+
+        // 4. SOLAT
+        let sVal = document.getElementById('sel-subuh').value; let suA = sVal === 'custom' ? parseFloat(document.getElementById('cust-subuh').value) || 18 : parseFloat(sVal);
+        let iVal = document.getElementById('sel-isyak').value; let isA = iVal === 'custom' ? parseFloat(document.getElementById('cust-isyak').value) || 18 : parseFloat(iVal);
+        
+        let hz = -0.833 - (0.0347*Math.sqrt(elev)), noon = SunCalc.getTimes(targetTime, lat, lon).solarNoon;
+        let tSu = findTimeByAlt(targetTime, lat, lon, -suA, true);
+        let tSy = findTimeByAlt(targetTime, lat, lon, hz, true);
+        let tMg = findTimeByAlt(targetTime, lat, lon, hz, false);
+        let tIs = findTimeByAlt(targetTime, lat, lon, -isA, false);
+        
+        const hlMethod = document.getElementById('highlat-method').value;
+        if(lat > 48 && tSu && tIs && tMg && tSy) {
+            const nightDuration = tSy.getTime() - tMg.getTime();
+            if(hlMethod === 'middle') {
+                tSu = new Date(tSy.getTime() - nightDuration / 2);
+                tIs = new Date(tMg.getTime() + nightDuration / 2);
+            } else if(hlMethod === 'oneseventh') {
+                tSu = new Date(tSy.getTime() - nightDuration / 7);
+                tIs = new Date(tMg.getTime() + nightDuration / 7);
+            } else if(hlMethod === 'angle') {
+                const fajrPart = suA / 60; const ishaPart = isA / 60;
+                tSu = new Date(tSy.getTime() - nightDuration * fajrPart);
+                tIs = new Date(tMg.getTime() + nightDuration * ishaPart);
+            }
+        }
+        
+        let tAs = null;
+        if(noon){
+            let nAlt = SunCalc.getPosition(noon, lat, lon).altitude;
+            let factor = document.getElementById('asr-method').value === 'hanafi' ? 2 : 1;
+            let asrAlt = Math.atan(1 / (factor + (1 / Math.tan(nAlt)))) * 180 / Math.PI;
+            tAs = findTimeByAlt(targetTime, lat, lon, asrAlt, false);
+        }
+		        
+        document.getElementById('p-subuh').innerText = fmtT(tSu); document.getElementById('p-syuruk').innerText = fmtT(tSy); document.getElementById('p-zohor').innerText = noon?fmtT(new Date(noon.getTime()+60000)):"-";
+        document.getElementById('p-asar').innerText = fmtT(tAs); document.getElementById('p-maghrib').innerText = fmtT(tMg); document.getElementById('p-isyak').innerText = fmtT(tIs);
+
+        calcDailyQiblaShadow(lat, lon, qAz, tSy, tMg);
+		updateAdvancedMapFeatures();
+
+        // 5. ASTROFOTO (PEMBETULAN: Membuang pepijat .slice() yang memotong data rentetan)
+        const tms = SunCalc.getTimes(targetTime, lat, lon);
+        document.getElementById('astro-gold-am').innerText = fmtT(tms.goldenHourEnd); 
+        document.getElementById('astro-blue-am').innerText = fmtT(tms.sunriseEnd);
+        document.getElementById('astro-gold-pm').innerText = fmtT(tms.goldenHour); 
+        document.getElementById('astro-blue-pm').innerText = fmtT(tms.dusk);
+
+        // 6. PLANET (PEMBETULAN: Menggunakan format tarikh tulen native Javascript Date)
+        try {
+            const obs = new Astronomy.Observer(lat, lon, elev);
+            let plHtml = '';
+            ['Mercury','Venus','Mars','Jupiter','Saturn'].forEach(b => {
+                let equ = Astronomy.Equator(b, targetTime, obs, true, true);
+                let hor = Astronomy.Horizon(targetTime, obs, equ.ra, equ.dec, 'normal');
+                plHtml += `<div><span class="label" style="color:var(--astro);">${b}</span>Az: ${hor.azimuth.toFixed(1)}°<br>Alt: ${hor.altitude.toFixed(1)}°</div>`;
+            });
+            document.getElementById('planet-data').innerHTML = plHtml;
+        } catch(e) { 
+            document.getElementById('planet-data').innerHTML = "<div style='grid-column:1/-1; color:red;'>Data planet gagal dimuatkan.</div>"; 
+        }
+
+        // 7. MOON & DARK SKY
+        const mDist = mPos.distance; const mIllu = SunCalc.getMoonIllumination(targetTime);
+        document.getElementById('res-moon-dist').innerText = `${Math.round(mDist)} km ${mDist < 360000 ? "⭐ (Supermoon!)" : ""}`;
+        document.getElementById('res-moon-illu').innerText = `Iluminasi: ${(mIllu.fraction*100).toFixed(1)}%`;
+        let ds = sAlt > -0.1 ? "Siang Hari" : sAlt > -0.2 ? "Senja" : `Bortle ${9 - Math.floor((1 - mIllu.fraction)*8)} (Anggaran)`;
+        document.getElementById('res-darksky').innerText = ds;
+        let m = targetTime.getMonth();
+        let met = m===7?"Perseids (Ogos)":m===11?"Geminids (Dis)":m===9?"Orionids (Okt)":m===3?"Lyrids (Apr)":m===4?"Eta Aquariids (Mei)":"Tiada Major";
+        document.getElementById('meteor-list').innerText = met;
+    }
+
+    function calcDailyQiblaShadow(lat, lon, qAz, tSy, tMg) {
+        let el = document.getElementById('qibla-shadow-time');
+        if(!tSy || !tMg) { el.innerText = "Matahari tidak terbit/terbenam"; return; }
+        let bestT = null, minD = 180, notice = "";
+        for(let t = tSy.getTime(); t <= tMg.getTime(); t += 60000) {
+            let az = (SunCalc.getPosition(new Date(t), lat, lon).azimuth*180/Math.PI+180)%360;
+            let d1 = Math.abs(az-qAz); if(d1>180) d1=360-d1; let d2 = Math.abs(az-((qAz+180)%360)); if(d2>180) d2=360-d2;
+            if(d1 < minD) { minD = d1; bestT = t; notice = "Bayang MEMBELAKANGI arah Kiblat"; }
+            if(d2 < minD) { minD = d2; bestT = t; notice = "Bayang MENGHALA arah Kiblat"; }
+        }
+        el.innerHTML = minD < 1 ? `${fmtT(new Date(bestT))} <br><small style="color:#555;">${notice}</small>` : "Tiada jajaran bayang Kiblat.";
+    }
+</script>
+</body>
+</html>
        </label>
    
        <label class="jakim-label">
