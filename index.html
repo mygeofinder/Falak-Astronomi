@@ -14,9 +14,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-
+    
     <style>
         :root { --primary: #0d47a1; --accent: #ff6f00; --qibla: #4caf50; --sun: #ff9800; --moon: #9e9e9e; --shadow: #b71c1c; --astro: #673ab7; }
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #e9ecef; color: #222; }
@@ -178,47 +176,84 @@
         </div>
     </div>
 
-    <div id="arContainer"
-    style="display:none; position:relative;
-    height:300px;
-    overflow:hidden;
-    border-radius:12px;">
-
-        <video
-        id="cameraFeed"
-        autoplay
-        playsinline
-        muted
-        style="
-        width:100%;
-        height:100%;
-        object-fit:cover;">
-        </video>
-    
-        <div id="qiblaARArrow"
-        style="
-        position:absolute;
-        top:50%;
-        left:50%;
-        font-size:60px;
-        transform:translate(-50%,-50%);
-        z-index:1000;">
-        ⬆️
-        </div>
-    
-        <div id="qiblaLine"
-        style="
-        position:absolute;
-        bottom:20px;
-        left:50%;
-        width:6px;
-        height:150px;
-        background:#00ff00;
-        transform-origin:bottom center;
-    	z-index:999;">
-        </div>
-    
-    </div>
+	<div
+	id="arContainer"
+	
+	style="
+	display:none;
+	position:relative;
+	height:300px;
+	overflow:hidden;">
+	
+	<video
+	id="cameraFeed"
+	autoplay
+	playsinline
+	
+	style="
+	width:100%;
+	height:100%;
+	object-fit:cover;">
+	</video>
+	
+	
+	<div
+	id="qiblaGuide"
+	
+	style="
+	position:absolute;
+	left:50%;
+	bottom:0;
+	
+	width:6px;
+	height:250px;
+	
+	background:red;
+	
+	transform:
+	translateX(-50%);
+	
+	transition:.2s;">
+	
+	</div>
+	
+	
+	
+	<div
+	id="leftArrow"
+	
+	style="
+	position:absolute;
+	left:20px;
+	top:50%;
+	
+	font-size:50px;
+	
+	display:none;">
+	
+	⬅️
+	
+	</div>
+	
+	
+	
+	<div
+	id="rightArrow"
+	
+	style="
+	position:absolute;
+	right:20px;
+	top:50%;
+	
+	font-size:50px;
+	
+	display:none;">
+	
+	➡️
+	
+	</div>
+	
+	</div>
 
     <div class="card">
         <h2>🕌 Waktu Solat (Bisection) & Parameter</h2>
@@ -354,76 +389,86 @@
     <div align="center">
     
     <div id="digitalCompass">
-    
-    <svg
-    viewBox="0 0 400 400"
-    width="320">
-    
-    <circle
-    cx="200"
-    cy="200"
-    r="190"
-    fill="#1d1f28"/>
-    
-    <circle
-    cx="200"
-    cy="200"
-    r="165"
-    fill="#111"/>
-    
-    <g id="compassScale"></g>
-    
-    <polygon
-    id="needle"
-    
-    points="
-    200,80
-    190,200
-    210,200"
-    
-    fill="#00ff00"/>
-    
-    <text
-    id="compassDeg"
-    
-    x="200"
-    y="220"
-    font-size="44"
-    fill="white"
-    text-anchor="middle">
-    
-    0°
-    
-    </text>
-    
-    <text
-    
-    x="200"
-    y="260"
-    font-size="24"
-    fill="white"
-    text-anchor="middle">
-    
-    Kiblat
-    
-    </text>
-    
-    </svg>
-    
-    </div>
-    
-    <div
-    id="headingText"
-    
-    style="
-    margin-top:10px;
-    font-weight:bold;">
-    -
-    </div>
-    
-    </div>
-    
-    </div>
+
+	<svg
+	viewBox="0 0 400 400"
+	width="330">
+	
+	<g id="compassRing">
+	
+	<circle
+	cx="200"
+	cy="200"
+	r="190"
+	fill="#1d1f28"/>
+	
+	<circle
+	cx="200"
+	cy="200"
+	r="165"
+	fill="#111"/>
+	
+	<g id="compassScale"></g>
+	
+	<text
+	id="kaabaMark"
+	x="200"
+	y="35"
+	font-size="28"
+	text-anchor="middle">
+	
+	🕋
+	
+	</text>
+	
+	</g>
+	
+	<polygon
+	points="
+	200,70
+	192,95
+	208,95"
+	
+	fill="#00ff44"/>
+	
+	<text
+	x="200"
+	y="150"
+	font-size="18"
+	fill="white"
+	text-anchor="middle">
+	
+	UTARA
+	
+	</text>
+	
+	<text
+	id="compassDeg"
+	x="200"
+	y="220"
+	font-size="40"
+	fill="white"
+	text-anchor="middle">
+	
+	0°
+	
+	</text>
+	
+	<text
+	id="compassDMS"
+	x="200"
+	y="260"
+	font-size="18"
+	fill="white"
+	text-anchor="middle">
+	
+	-
+	
+	</text>
+	
+	</svg>
+	
+	</div>
 	
 </div>
 
@@ -880,7 +925,28 @@
         if(document.getElementById('chk-qibla-live').checked) { startQiblaCompass(); }
     }
 
-    async function startQiblaCompass() {
+    function degToDMS(deg){
+
+	let d=
+	Math.floor(deg);
+	
+	let minFloat=
+	(deg-d)*60;
+	
+	let m=
+	Math.floor(minFloat);
+	
+	let s=
+	(
+	(minFloat-m)
+	*
+	60
+	);
+	
+	return `${d}° ${m}' ${s.toFixed(1)}"`;
+	
+	}
+	async function startQiblaCompass() {
         if(qiblaSensorRunning) return;
         qiblaSensorRunning = true;
         if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
@@ -908,51 +974,140 @@
             let qiblaAzimuth = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 
             // PEMBETULAN: Membetulkan ralat sisihan kompas 90 darjah potret pelayar mudah alih
-            let screenAngle=
-            window.orientation||0;
-
+            
             let relativeAngle=
 
-            (
-            qiblaAzimuth
-            -
-            smoothHeading
-            -
-            screenAngle
-            +
-            360
-            )
-
-            %360;
-
-            // Memusingkan jarum kompas UI aplikasi
-            document
-            .getElementById(
-            'needle'
-            )
-
-            .setAttribute(
-
-            'transform',            
-
-            `rotate(
-            ${relativeAngle}
-            200
-            200
-            )`
-            );
-
-            document
-            .getElementById(
-            'compassDeg'
-            )
-
-            .innerHTML=
-
-            `${Math.round(
-            qiblaAzimuth
-            )}°`;
+			(
+			qiblaAzimuth
+			-
+			smoothHeading
+			+
+			360
+			)
 			
+			%
+			360;
+			
+			
+			
+			document
+			.getElementById(
+			'compassRing'
+			)
+			
+			.setAttribute(
+			
+			'transform',
+			
+			`rotate(
+			${-smoothHeading}
+			200
+			200
+			)`
+			
+			);
+			
+			
+			
+			document
+			.getElementById(
+			'kaabaMark'
+			)
+			
+			.setAttribute(
+			
+			'transform',
+			
+			`rotate(
+			${relativeAngle}
+			200
+			200
+			)`
+			);
+			
+			
+			
+			document
+			.getElementById(
+			'compassDeg'
+			)
+			.innerHTML=
+			
+			`${Math.round(
+			smoothHeading
+			)}°`;
+			
+			document
+			.getElementById(
+			'compassDMS'
+			)
+			.innerHTML=
+			
+			degToDMS(
+			smoothHeading
+			);
+			
+			let guide=
+
+			document.getElementById(
+			"qiblaGuide"
+			);
+			
+			guide.style.transform=
+			
+			`translateX(-50%)
+			rotate(${relativeAngle}deg)`;
+			
+			
+			const leftArrow=
+			document.getElementById(
+			"leftArrow"
+			);
+			
+			const rightArrow=
+			document.getElementById(
+			"rightArrow"
+			);
+			
+			if(Math.abs(relativeAngle)<5){
+			
+			guide.style.background=
+			"#00ff00";
+			
+			leftArrow.style.display=
+			"none";
+			
+			rightArrow.style.display=
+			"none";
+			
+			}
+			
+			else{
+			
+			guide.style.background=
+			"red";
+			
+			if(relativeAngle>180){
+			
+			leftArrow.style.display=
+			"block";
+			
+			rightArrow.style.display=
+			"none";
+			
+			}
+			
+			else{
+			
+			rightArrow.style.display=
+			"block";
+			
+			leftArrow.style.display=
+			"none";
+			
+			}
+			
+			}
             if(document.getElementById('chk-3d-arrow').checked || document.getElementById('chk-ar').checked) {
                 rotate3DArrow(relativeAngle);
             }
@@ -976,44 +1131,91 @@
     }
 	
     function buildCompass(){
-    
-    let scale='';
-    
-    for(let i=0;i<360;i+=5){
-    
-    let a=
-    (i-90)
-    *
-    Math.PI/180;
-    
-    let x1=
-    200+
-    160*Math.cos(a);
-    
-    let y1=
-    200+
-    160*Math.sin(a);
-    
-    let x2=
-    200+
-    180*Math.cos(a);
-    
-    let y2=
-    200+
-    180*Math.sin(a);
-    
-    scale+=
-    `
-    <line
-    x1="${x1}"
-    y1="${y1}"
-    x2="${x2}"
-    y2="${y2}"
-    stroke="white"
-    stroke-width="1"/>
-    `;
-    
-    }
+
+	let scale='';
+	
+	for(let i=0;i<360;i+=5){
+	
+	let a=
+	(i-90)
+	*
+	Math.PI/180;
+	
+	let x1=
+	200+
+	150*Math.cos(a);
+	
+	let y1=
+	200+
+	150*Math.sin(a);
+	
+	let x2=
+	200+
+	180*Math.cos(a);
+	
+	let y2=
+	200+
+	180*Math.sin(a);
+	
+	let width=
+	i%30==0
+	?
+	3
+	:
+	1;
+	
+	scale+=`
+	
+	<line
+	
+	x1="${x1}"
+	y1="${y1}"
+	x2="${x2}"
+	y2="${y2}"
+	
+	stroke="white"
+	stroke-width="${width}"/>
+	
+	`;
+	
+	if(i%30==0){
+	
+	let tx=
+	200+
+	130*Math.cos(a);
+	
+	let ty=
+	205+
+	130*Math.sin(a);
+	
+	scale+=`
+	
+	<text
+	x="${tx}"
+	y="${ty}"
+	fill="white"
+	font-size="12"
+	text-anchor="middle">
+	
+	${i}
+	
+	</text>
+	
+	`;
+	
+	}
+	
+	}
+	
+	document
+	.getElementById(
+	'compassScale'
+	)
+	
+	.innerHTML=
+	scale;
+	
+	}
     
     document
     .getElementById(
@@ -1031,6 +1233,28 @@
         ar.style.display = active || document.getElementById('chk-3d-arrow').checked ? 'block' : 'none';
         if(active) startQiblaCompass();
     }
+	
+	function degToDMS(deg){
+
+	let d=
+	Math.floor(deg);
+	
+	let minFloat=
+	(deg-d)*60;
+	
+	let m=
+	Math.floor(minFloat);
+	
+	let s=
+	(
+	(minFloat-m)
+	*
+	60
+	);
+	
+	return `${d}° ${m}' ${s.toFixed(1)}"`;
+	
+	}
 </script>
 </body>
 </html>
