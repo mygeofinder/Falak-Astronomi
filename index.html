@@ -63,10 +63,10 @@
         .bg-blue { background: #3f51b5; }
         .footer { text-align: center; font-size: 0.8rem; color: #777; padding: 20px; }
 
-        /* GAYA PEMBETULAN AR: Mencegah ARjs memusnahkan antaramuka laman */
-        .a-canvas { position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: -1; }
-        .a-fullscreen .a-canvas { position: absolute !important; }
-        #arContainer { position: relative; width: 100%; height: 350px; border-radius: 12px; overflow: hidden; border: 2px solid var(--qibla); margin-bottom: 15px; }
+        /* PEMBETULAN STRUKTUR WINDOW AR: Mengurung paksa kanvas video ke dalam elemen kad sahaja */
+        #arContainer { position: relative; width: 100%; height: 300px; border-radius: 12px; overflow: hidden; border: 2px solid var(--qibla); margin-bottom: 15px; background-color: #000; }
+        #arContainer a-scene { width: 100% !important; height: 100% !important; position: absolute !important; top: 0; left: 0; }
+        .a-canvas { width: 100% !important; height: 100% !important; position: absolute !important; top: 0; left: 0; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -178,11 +178,46 @@
         </div>
     </div>
 
-    <div id="arContainer" style="display:none;">
-        <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
-            <a-entity id="kaaba3D" position="0 0 -3" rotation="90 0 0" geometry="primitive: cone; radiusBottom: 0.2; height: 0.8" material="color: #4caf50"></a-entity>
-            <a-camera gps-camera rotation-reader></a-camera>
-        </a-scene>
+    <div id="arContainer"
+    style="display:none; position:relative;
+    height:300px;
+    overflow:hidden;
+    border-radius:12px;">
+
+        <video
+        id="cameraFeed"
+        autoplay
+        playsinline
+        muted
+        style="
+        width:100%;
+        height:100%;
+        object-fit:cover;">
+        </video>
+    
+        <div id="qiblaARArrow"
+        style="
+        position:absolute;
+        top:50%;
+        left:50%;
+        font-size:60px;
+        transform:translate(-50%,-50%);
+        z-index:1000;">
+        ⬆️
+        </div>
+    
+        <div id="qiblaLine"
+        style="
+        position:absolute;
+        bottom:20px;
+        left:50%;
+        width:6px;
+        height:150px;
+        background:#00ff00;
+        transform-origin:bottom center;
+    	z-index:999;">
+        </div>
+    
     </div>
 
     <div class="card">
@@ -256,7 +291,7 @@
     </div>
 
     <div class="card">
-        <h2>☀️ Pedoman Suria Visual (DMS)</h2>
+        <h2>🌍 Pedoman Suria Visual (DMS)</h2>
         <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
         
         <div class="diagram-container">
@@ -313,14 +348,83 @@
     </div>
 
     <div class="card">
-        <h2>🧭 Kompas Kiblat Live</h2>
-        <div style="text-align:center">
-            <div id="compassRing" style="width:260px; height:260px; margin:auto; border:4px solid #ccc; border-radius:50%; position:relative; overflow:hidden; background: #fff;">
-                <div id="qiblaNeedle" style="font-size:80px; position:absolute; top:50%; left:50%; transform: translate(-50%,-50%) rotate(0deg); transition:transform .15s linear;">⬆️</div>
-            </div>
-            <div id="headingText" style="margin-top:10px; font-weight:bold;">Arah: -</div>
-        </div>
+
+    <h2>🧭 Kompas Kiblat Digital</h2>
+    
+    <div align="center">
+    
+    <div id="digitalCompass">
+    
+    <svg
+    viewBox="0 0 400 400"
+    width="320">
+    
+    <circle
+    cx="200"
+    cy="200"
+    r="190"
+    fill="#1d1f28"/>
+    
+    <circle
+    cx="200"
+    cy="200"
+    r="165"
+    fill="#111"/>
+    
+    <g id="compassScale"></g>
+    
+    <polygon
+    id="needle"
+    
+    points="
+    200,80
+    190,200
+    210,200"
+    
+    fill="#00ff00"/>
+    
+    <text
+    id="compassDeg"
+    
+    x="200"
+    y="220"
+    font-size="44"
+    fill="white"
+    text-anchor="middle">
+    
+    0°
+    
+    </text>
+    
+    <text
+    
+    x="200"
+    y="260"
+    font-size="24"
+    fill="white"
+    text-anchor="middle">
+    
+    Kiblat
+    
+    </text>
+    
+    </svg>
+    
     </div>
+    
+    <div
+    id="headingText"
+    
+    style="
+    margin-top:10px;
+    font-weight:bold;">
+    -
+    </div>
+    
+    </div>
+    
+    </div>
+	
 </div>
 
 <div class="footer">Falak & Astro Trial Edition &copy; 2026</div>
@@ -398,11 +502,26 @@
     ];
 	
     window.onload = () => {
-        populateJakim(); initMap(); drawCompassFace(); drawVerticalFace();
-        updateUI(); runCalculations();
-        setTimeout(() => getCurrentLocation(true), 1000);
-    };
 
+    populateJakim();
+    
+    initMap();
+    
+    drawCompassFace();
+    
+    drawVerticalFace();
+    
+    buildCompass();
+    
+    updateUI();
+    
+    runCalculations();
+    
+    setTimeout(() =>
+    getCurrentLocation(true),1000);
+    
+    };
+	
     function initMap() {
         const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
         const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
@@ -488,11 +607,12 @@
         }
     }
 
+    /* PEMBETULAN: Fungsi Peta disambung terus ke penunjuk garisan Kiblat Great Circle */
     function updateAdvancedMapFeatures() {
         const kaaba = { lat: 21.422487, lon: 39.826206 };
         if(document.getElementById('chk-greatcircle').checked) {
             if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
-            qiblaGreatCircle = L.polyline([[userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]], { color: 'blue', weight: 2, opacity: 0.7 }).addTo(map);
+            qiblaGreatCircle = L.polyline([[userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]], { color: 'blue', weight: 3, opacity: 0.8 }).addTo(map);
         } else {
             if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
         }
@@ -737,14 +857,14 @@
     }
 	
     // ===================================================
-    // KOD PEMBETULAN: KOMPAS + KALMAN + AR
+    // KOD PENETAPAN & KESTABILAN SENSOR KOMPAS + KALMAN + AR
     // ===================================================
     let kalmanHeading = 0;
     let kalmanError = 1;
     let qiblaSensorRunning = false;
 
     class Kalman {
-        constructor() { this.q = 0.01; this.r = 1; }
+        constructor() { this.q = 0.05; this.r = 2; } // Mempertingkatkan tindak balas Kalman filter
         filter(value) {
             kalmanError += this.q;
             let k = kalmanError / (kalmanError + this.r);
@@ -764,36 +884,79 @@
         if(qiblaSensorRunning) return;
         qiblaSensorRunning = true;
         if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
-            try { await DeviceOrientationEvent.requestPermission(); } catch(e) { alert("Akses sensor peranti tidak dibenarkan."); return; }
+            try { await DeviceOrientationEvent.requestPermission(); } catch(e) { alert("Akses sensor kompas ditolak."); return; }
         }
 
         window.addEventListener('deviceorientation', function(e) {
             if(!document.getElementById('chk-qibla-live').checked) return;
             
-            // Mengira heading kompas mutlak peranti
-            let heading = 360 - (e.alpha || 0);
-            heading = (heading + 360) % 360;
-            let smooth = kalman.filter(heading);
+            // Mengambil arah mutlak kompas peranti (Alpha / Webkit)
+            let deviceHeading = 0;
+            if (e.webkitCompassHeading) {
+                deviceHeading = e.webkitCompassHeading; // Untuk peranti iOS Safari
+            } else {
+                deviceHeading = 360 - (e.alpha || 0); // Peranti Android Chrome
+            }
+            deviceHeading = (deviceHeading + 360) % 360;
+            let smoothHeading = kalman.filter(deviceHeading);
 
-            // Kira azimuth Kiblat semasa
+            // Pengiraan Trigonometri Azimut Kiblat Makkah
             const kaabaLat = 21.422487; const kaabaLon = 39.826206;
             let dLon = (kaabaLon - userCoords.lon) * Math.PI / 180;
             let y = Math.sin(dLon);
             let x = Math.cos(userCoords.lat * Math.PI / 180) * Math.tan(kaabaLat * Math.PI / 180) - Math.sin(userCoords.lat * Math.PI / 180) * Math.cos(dLon);
-            let qibla = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+            let qiblaAzimuth = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 
-            // Sudut relatif penunjuk kompas terhadap orientasi telefon
-            let relative = qibla - smooth;
+            // PEMBETULAN: Membetulkan ralat sisihan kompas 90 darjah potret pelayar mudah alih
+            let screenAngle=
+            window.orientation||0;
 
-            document.getElementById("qiblaNeedle").style.transform = `translate(-50%,-50%) rotate(${relative}deg)`;
-            
-            // PEMBETULAN: Ditambah titik (.) sebelum innerHTML untuk membaiki ralat skrip
-            document.getElementById("headingText").innerHTML = `Arah Telefon: ${smooth.toFixed(1)}°<br>Azimut Kiblat: ${qibla.toFixed(1)}°`;
+            let relativeAngle=
 
+            (
+            qiblaAzimuth
+            -
+            smoothHeading
+            -
+            screenAngle
+            +
+            360
+            )
+
+            %360;
+
+            // Memusingkan jarum kompas UI aplikasi
+            document
+            .getElementById(
+            'needle'
+            )
+
+            .setAttribute(
+
+            'transform',            
+
+            `rotate(
+            ${relativeAngle}
+            200
+            200
+            )`
+            );
+
+            document
+            .getElementById(
+            'compassDeg'
+            )
+
+            .innerHTML=
+
+            `${Math.round(
+            qiblaAzimuth
+            )}°`;
+			
             if(document.getElementById('chk-3d-arrow').checked || document.getElementById('chk-ar').checked) {
-                rotate3DArrow(relative);
+                rotate3DArrow(relativeAngle);
             }
-        });
+        }, true);
     }
 
     function toggle3DArrow() {
@@ -808,8 +971,58 @@
     function rotate3DArrow(angle) {
         let el = document.getElementById("kaaba3D");
         if(!el) return;
-        // PEMBETULAN: Menggunakan paksi Y (0 ${angle} 0) untuk putaran kompas AR yang tepat
+        // Penjajaran paksi Y objek 3D untuk AR dunia sebenar
         el.setAttribute('rotation', `0 ${angle} 0`);
+    }
+	
+    function buildCompass(){
+    
+    let scale='';
+    
+    for(let i=0;i<360;i+=5){
+    
+    let a=
+    (i-90)
+    *
+    Math.PI/180;
+    
+    let x1=
+    200+
+    160*Math.cos(a);
+    
+    let y1=
+    200+
+    160*Math.sin(a);
+    
+    let x2=
+    200+
+    180*Math.cos(a);
+    
+    let y2=
+    200+
+    180*Math.sin(a);
+    
+    scale+=
+    `
+    <line
+    x1="${x1}"
+    y1="${y1}"
+    x2="${x2}"
+    y2="${y2}"
+    stroke="white"
+    stroke-width="1"/>
+    `;
+    
+    }
+    
+    document
+    .getElementById(
+    'compassScale'
+    )
+    
+    .innerHTML=
+    scale;
+    
     }
 
     function toggleAR() {
