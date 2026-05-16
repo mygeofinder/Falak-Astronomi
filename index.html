@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ms">
-<head>
+<!DOCTYPE html><html lang="ms"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modul Asas Falak & Astro INSTUN</title>
@@ -15,8 +13,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@photostructure/tz-lookup@11.0.0/tz.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+    
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
     <style>
         :root { --primary: #0d47a1; --accent: #ff6f00; --qibla: #4caf50; --sun: #ff9800; --moon: #9e9e9e; --shadow: #b71c1c; --astro: #673ab7; }
@@ -63,15 +62,18 @@
         .bg-gold { background: #ffb300; color: #000; }
         .bg-blue { background: #3f51b5; }
         .footer { text-align: center; font-size: 0.8rem; color: #777; padding: 20px; }
+
+        /* GAYA PEMBETULAN AR: Mencegah ARjs memusnahkan antaramuka laman */
+        .a-canvas { position: absolute !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: -1; }
+        .a-fullscreen .a-canvas { position: absolute !important; }
+        #arContainer { position: relative; width: 100%; height: 350px; border-radius: 12px; overflow: hidden; border: 2px solid var(--qibla); margin-bottom: 15px; }
     </style>
 </head>
 <body>
-
 <header>
     <div style="font-size: 1.3rem; font-weight: bold;">MODUL ASAS FALAK & ASTRO INSTUN</div>
     <div style="font-size: 0.8rem; opacity: 0.9;">Trial Edition (Universal Astro & Scientific Falak)</div>
 </header>
-
 <div class="container">
     <div class="card">
         <h2>📍 Lokasi & Masa</h2>
@@ -86,69 +88,57 @@
         <div id="map"></div>
 		
 		<div class="jakim-box" style="margin-top:10px;">
-      <label class="jakim-label">
-           <input type="checkbox" id="chk-greatcircle" onchange="updateAdvancedMapFeatures()">
-           <span>🌍 Great Circle Kiblat Sebenar</span>
-       </label>
-   
-       <label class="jakim-label">
-           <input type="checkbox" id="chk-distance" onchange="updateAdvancedMapFeatures()">
-           <span>📏 Papar Jarak ke Kaabah</span>
-       </label>
-   
-       <label class="jakim-label">
-           <input type="checkbox" id="chk-kaaba" onchange="updateAdvancedMapFeatures()">
-           <span>🕋 Papar Ikon Kaabah</span>
-       </label>
-   
-       <label class="jakim-label">
-           <input type="checkbox" id="chk-sun" onchange="updateAdvancedMapFeatures()">
-           <span>☀️ Arah Sunrise/Sunset</span>
-       </label>
-   
-       <label class="jakim-label">
-           <input type="checkbox" id="chk-moon" onchange="updateAdvancedMapFeatures()">
-           <span>🌙 Arah Moonrise/Moonset</span>
-       </label>
-   
-       <label class="jakim-label">
-           <input type="checkbox" id="chk-compass" onchange="toggleCompassSensor()">
-           <span>📱 Compass Sensor Telefon Live</span>
-       </label>
-	   
-	   <label class="jakim-label">
-           <input type="checkbox"
-               id="chk-qibla-live"
-               onchange="toggleQiblaCompass()">
-
-           <span>🧭 Kompas Kiblat Masa Nyata (Kalman)</span>
-       </label>
-
-       <label class="jakim-label">
-           <input type="checkbox"
-                  id="chk-3d-arrow"
-                  onchange="toggle3DArrow()">
+          <label class="jakim-label">
+               <input type="checkbox" id="chk-greatcircle" onchange="updateAdvancedMapFeatures()">
+               <span>🌍 Great Circle Kiblat Sebenar</span>
+           </label>
        
-           <span>🕋 Papar Anak Panah 3D Kaabah</span>
-       </label>
-        
-       <label class="jakim-label">
-           <input type="checkbox"
-                  id="chk-ar"
-                  onchange="toggleAR()">
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-distance" onchange="updateAdvancedMapFeatures()">
+               <span>📏 Papar Jarak ke Kaabah</span>
+           </label>
        
-           <span>📷 Mod AR Kamera Kiblat</span>
-       </label>
-		   
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-kaaba" onchange="updateAdvancedMapFeatures()">
+               <span>🕋 Papar Ikon Kaabah</span>
+           </label>
+       
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-sun" onchange="updateAdvancedMapFeatures()">
+               <span>☀️ Arah Sunrise/Sunset</span>
+           </label>
+       
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-moon" onchange="updateAdvancedMapFeatures()">
+               <span>🌙 Arah Moonrise/Moonset</span>
+           </label>
+       
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-compass" onchange="toggleCompassSensor()">
+               <span>📱 Compass Sensor Telefon Live</span>
+           </label>
+    	   
+    	   <label class="jakim-label">
+               <input type="checkbox" id="chk-qibla-live" onchange="toggleQiblaCompass()">
+               <span>🧭 Kompas Kiblat Masa Nyata (Kalman)</span>
+           </label>
+    
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-3d-arrow" onchange="toggle3DArrow()">
+               <span>📐 Papar Anak Panah 3D Kaabah</span>
+           </label>
+            
+           <label class="jakim-label">
+               <input type="checkbox" id="chk-ar" onchange="toggleAR()">
+               <span>📷 Mod AR Kamera Kiblat</span>
+           </label>
 		</div>
 
         <div class="jakim-box">
-		
             <label class="jakim-label">
                 <input type="checkbox" id="chk-jakim" onchange="toggleJakim()"> 
                 <span>Gunakan Rujukan 59 Zon JAKIM</span>
             </label>
-			
             <div id="jakim-selector" style="display: none; margin-top: 10px;">
                 <select id="sel-jakim" onchange="syncFromJakim()"></select>
             </div>
@@ -188,6 +178,13 @@
         </div>
     </div>
 
+    <div id="arContainer" style="display:none;">
+        <a-scene embedded arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;">
+            <a-entity id="kaaba3D" position="0 0 -3" rotation="90 0 0" geometry="primitive: cone; radiusBottom: 0.2; height: 0.8" material="color: #4caf50"></a-entity>
+            <a-camera gps-camera rotation-reader></a-camera>
+        </a-scene>
+    </div>
+
     <div class="card">
         <h2>🕌 Waktu Solat (Bisection) & Parameter</h2>
         <div style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom: 10px;">
@@ -225,7 +222,6 @@
                     <option value="jafari">Shia Ithna Ashari (Jafari)</option>
                 </select>
             </div>
-            
             <div class="param-group">
                 Asar:
                 <select id="asr-method" onchange="runCalculations()">
@@ -233,7 +229,6 @@
                     <option value="hanafi">Hanafi</option>
                 </select>
             </div>
-            
             <div class="param-group">
                 High Latitude:
                 <select id="highlat-method" onchange="runCalculations()">
@@ -261,7 +256,7 @@
     </div>
 
     <div class="card">
-        <h2>🌍 Pedoman Suria Visual (DMS)</h2>
+        <h2>☀️ Pedoman Suria Visual (DMS)</h2>
         <p class="sun-status-text" id="sun-status-text">Kiraan sedang dijalankan...</p>
         
         <div class="diagram-container">
@@ -317,90 +312,20 @@
         </div>
     </div>
 
-</div>
-<div class="card">
-
-<h2>🧭 Kompas Kiblat Live</h2>
-
-<div style="text-align:center">
-
-<div id="compassRing"
-style="
-width:260px;
-height:260px;
-margin:auto;
-border:4px solid #ccc;
-border-radius:50%;
-position:relative;
-overflow:hidden;">
-
-<div id="qiblaNeedle"
-
-style="
-font-size:80px;
-position:absolute;
-top:50%;
-left:50%;
-transform:
-translate(-50%,-50%)
-rotate(0deg);
-
-transition:transform .15s linear;">
-
-🧭
-
-</div>
-
-</div>
-
-<div id="headingText"
-style="margin-top:10px;font-weight:bold;">
-Arah: -
-</div>
-
-</div>
-
-</div>
-
-
-
-<div id="arContainer"
-
-style="
-display:none;
-height:400px;">
-
-<a-scene
-embedded
-arjs="sourceType:webcam;">
-
-<a-entity
-id="kaaba3D"
-
-position="0 0 -5"
-
-rotation="0 0 0"
-
-geometry="
-primitive:cone;
-radiusBottom:0.3;
-height:1.2"
-
-material="
-color:green">
-
-</a-entity>
-
-<a-camera></a-camera>
-
-</a-scene>
-
+    <div class="card">
+        <h2>🧭 Kompas Kiblat Live</h2>
+        <div style="text-align:center">
+            <div id="compassRing" style="width:260px; height:260px; margin:auto; border:4px solid #ccc; border-radius:50%; position:relative; overflow:hidden; background: #fff;">
+                <div id="qiblaNeedle" style="font-size:80px; position:absolute; top:50%; left:50%; transform: translate(-50%,-50%) rotate(0deg); transition:transform .15s linear;">⬆️</div>
+            </div>
+            <div id="headingText" style="margin-top:10px; font-weight:bold;">Arah: -</div>
+        </div>
+    </div>
 </div>
 
 <div class="footer">Falak & Astro Trial Edition &copy; 2026</div>
 
 <script>
-    // --- PEMBOLEH UBAH GLOBAL ---
     let userCoords = { lat: 3.1390, lon: 101.6869 };
     let targetTime = new Date();
     let map, marker, isJakimMode = false;
@@ -478,17 +403,11 @@ color:green">
         setTimeout(() => getCurrentLocation(true), 1000);
     };
 
-    // --- LOKASI & PETA ---
     function initMap() {
         const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
         const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
 
-        map = L.map('map', {
-            center: [userCoords.lat, userCoords.lon],
-            zoom: 10,
-            layers: [osm]
-        });
-
+        map = L.map('map', { center: [userCoords.lat, userCoords.lon], zoom: 10, layers: [osm] });
         const baseLayers = { "Standard": osm, "Satellite": satellite };
         L.control.layers(baseLayers).addTo(map);
 
@@ -497,7 +416,7 @@ color:green">
         map.on('click', e => { 
             if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
             userCoords.lat = e.latlng.lat; userCoords.lon = e.latlng.lng; 
-            marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin
+            marker.setLatLng([userCoords.lat, userCoords.lon]);
             detectTimezone(userCoords.lat, userCoords.lon);
             detectElevation(userCoords.lat, userCoords.lon);
             updateUI(false); runCalculations(); 
@@ -549,7 +468,7 @@ color:green">
         if(data[0]) { 
             if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
             userCoords.lat = parseFloat(data[0].lat); userCoords.lon = parseFloat(data[0].lon); 
-            marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin daripada Carian POI
+            marker.setLatLng([userCoords.lat, userCoords.lon]);
             detectTimezone(userCoords.lat, userCoords.lon);
             detectElevation(userCoords.lat, userCoords.lon);
             updateUI(); runCalculations(); 
@@ -561,7 +480,7 @@ color:green">
             navigator.geolocation.getCurrentPosition(p => {
                 if(isJakimMode) { document.getElementById('chk-jakim').checked = false; toggleJakim(); }
                 userCoords.lat = p.coords.latitude; userCoords.lon = p.coords.longitude;
-                marker.setLatLng([userCoords.lat, userCoords.lon]); // Kemas kini kedudukan Pin daripada GPS
+                marker.setLatLng([userCoords.lat, userCoords.lon]);
                 detectTimezone(userCoords.lat, userCoords.lon);
                 detectElevation(userCoords.lat, userCoords.lon);
                 targetTime = new Date(); updateUI(); runCalculations();
@@ -571,54 +490,38 @@ color:green">
 
     function updateAdvancedMapFeatures() {
         const kaaba = { lat: 21.422487, lon: 39.826206 };
-    
         if(document.getElementById('chk-greatcircle').checked) {
             if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
             qiblaGreatCircle = L.polyline([[userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]], { color: 'blue', weight: 2, opacity: 0.7 }).addTo(map);
         } else {
             if(qiblaGreatCircle) map.removeLayer(qiblaGreatCircle);
         }
-    
         if(document.getElementById('chk-kaaba').checked) {
-            if(!kaabaMarker) {
-                kaabaMarker = L.marker([kaaba.lat, kaaba.lon]).addTo(map);
-                kaabaMarker.bindPopup("🕋 Kaabah");
-            }
+            if(!kaabaMarker) { kaabaMarker = L.marker([kaaba.lat, kaaba.lon]).addTo(map); kaabaMarker.bindPopup("🕋 Kaabah"); }
         } else {
             if(kaabaMarker) { map.removeLayer(kaabaMarker); kaabaMarker = null; }
         }
-    
         if(document.getElementById('chk-sun').checked) {
             const sPos = SunCalc.getPosition(targetTime, userCoords.lat, userCoords.lon);
             const sAz = (sPos.azimuth * 180 / Math.PI + 180) % 360;
             drawBearingLine(sAz, 'orange', 'sun');
-        } else {
-            if(sunLine) map.removeLayer(sunLine);
-        }
-    
+        } else { if(sunLine) map.removeLayer(sunLine); }
         if(document.getElementById('chk-moon').checked) {
             const mPos = SunCalc.getMoonPosition(targetTime, userCoords.lat, userCoords.lon);
             const mAz = (mPos.azimuth * 180 / Math.PI + 180) % 360;
             drawBearingLine(mAz, 'gray', 'moon');
-        } else {
-            if(moonLine) map.removeLayer(moonLine);
-        }
-    
+        } else { if(moonLine) map.removeLayer(moonLine); }
         if(document.getElementById('chk-distance').checked) {
             const dist = map.distance([userCoords.lat, userCoords.lon], [kaaba.lat, kaaba.lon]) / 1000;
             marker.bindPopup(`📏 Jarak ke Kaabah:<br><b>${dist.toFixed(1)} km</b>`).openPopup();
-        } else {
-            marker.closePopup();
-        }
+        } else { marker.closePopup(); }
     }
 
     function drawBearingLine(azimuth, color, type) {
-        const distance = 500000;
-        const rad = azimuth * Math.PI / 180;
+        const distance = 500000; const rad = azimuth * Math.PI / 180;
         const lat2 = userCoords.lat + (distance / 111320) * Math.cos(rad);
         const lon2 = userCoords.lon + (distance / (111320 * Math.cos(userCoords.lat * Math.PI/180))) * Math.sin(rad);
         const line = L.polyline([[userCoords.lat, userCoords.lon], [lat2, lon2]], { color: color, dashArray: '5,5' }).addTo(map);
-    
         if(type === 'sun') { if(sunLine) map.removeLayer(sunLine); sunLine = line; }
         if(type === 'moon') { if(moonLine) map.removeLayer(moonLine); moonLine = line; }
     }
@@ -628,15 +531,11 @@ color:green">
         if(window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', function(event) {
                 const heading = event.alpha || 0;
-                if(qiblaArrow) {
-                    const arrow = qiblaArrow.getElement();
-                    if(arrow) { arrow.style.transform = `rotate(${heading}deg)`; }
-                }
+                if(qiblaArrow) { const arrow = qiblaArrow.getElement(); if(arrow) { arrow.style.transform = `rotate(${heading}deg)`; } }
             });
         }
     }
 
-    // --- UI PENYEGERAKAN ---
     function populateJakim() {
         let sel = document.getElementById('sel-jakim');
         jakimZones.forEach(z => { sel.innerHTML += `<option value="${z.id}" ${z.id==="WLY01"?"selected":""}>${z.name}</option>`; });
@@ -646,19 +545,12 @@ color:green">
         isJakimMode = document.getElementById('chk-jakim').checked;
         document.getElementById('jakim-selector').style.display = isJakimMode ? 'block' : 'none';
         ['lat-d','lat-m','lat-s','lat-dir','lon-d','lon-m','lon-s','lon-dir'].forEach(id => document.getElementById(id).disabled = isJakimMode);
-        if(isJakimMode) {
-            document.getElementById('in-tz').value = 8;
-            syncFromJakim();
-        }
+        if(isJakimMode) { document.getElementById('in-tz').value = 8; syncFromJakim(); }
     }
     
     function syncFromJakim() {
         let z = jakimZones.find(x => x.id === document.getElementById('sel-jakim').value);
-        if(z) { 
-            userCoords.lat = z.lat; userCoords.lon = z.lon; 
-            marker.setLatLng([userCoords.lat, userCoords.lon]); // Pin bergerak jika pilih zon JAKIM
-            updateUI(); runCalculations(); 
-        }
+        if(z) { userCoords.lat = z.lat; userCoords.lon = z.lon; marker.setLatLng([userCoords.lat, userCoords.lon]); updateUI(); runCalculations(); }
     }
 
     function checkCustom(type) {
@@ -671,7 +563,6 @@ color:green">
     function applyCalculationMethod() {
         const method = document.getElementById('calc-method').value;
         let fajr = 18; let isha = 18;
-    
         switch(method) {
             case 'malaysia': fajr = 18; isha = 18; break;
             case 'mwl': fajr = 18; isha = 17; break;
@@ -690,23 +581,18 @@ color:green">
     function updateUI(recenterMap = true) {
         const toObj = deg => { let a = Math.abs(deg), d = Math.floor(a), m = Math.floor((a-d)*60); return {d:d, m:m, s:((a-d)*60-m)*60, dir:deg>=0?1:-1}; };
         let latD = toObj(userCoords.lat), lonD = toObj(userCoords.lon);
-        
         document.getElementById('lat-d').value = latD.d; document.getElementById('lat-m').value = latD.m; document.getElementById('lat-s').value = latD.s.toFixed(2); document.getElementById('lat-dir').value = latD.dir;
         document.getElementById('lon-d').value = lonD.d; document.getElementById('lon-m').value = lonD.m; document.getElementById('lon-s').value = lonD.s.toFixed(2); document.getElementById('lon-dir').value = lonD.dir;
-        
         let local = new Date(targetTime.getTime() - (targetTime.getTimezoneOffset() * 60000)).toISOString().slice(0,19);
         document.getElementById('in-datetime').value = local;
-        
-        if (recenterMap && map) {
-            map.setView([userCoords.lat, userCoords.lon], 15);
-        }
+        if (recenterMap && map) { map.setView([userCoords.lat, userCoords.lon], 15); }
     }
 
     function syncDMS() {
         const toDd = (d,m,s,dir) => (parseFloat(d||0) + parseFloat(m||0)/60 + parseFloat(s||0)/3600) * parseFloat(dir);
         userCoords.lat = toDd(document.getElementById('lat-d').value, document.getElementById('lat-m').value, document.getElementById('lat-s').value, document.getElementById('lat-dir').value);
         userCoords.lon = toDd(document.getElementById('lon-d').value, document.getElementById('lon-m').value, document.getElementById('lon-s').value, document.getElementById('lon-dir').value);
-        marker.setLatLng([userCoords.lat, userCoords.lon]); // Pin bergerak jika koordinat DMS diubah manual
+        marker.setLatLng([userCoords.lat, userCoords.lon]);
         detectTimezone(userCoords.lat, userCoords.lon);
         detectElevation(userCoords.lat, userCoords.lon);
         updateUI(false); runCalculations();
@@ -714,8 +600,7 @@ color:green">
 
     function syncTime() { targetTime = new Date(document.getElementById('in-datetime').value); runCalculations(); }
     function setRealTime() { targetTime = new Date(); updateUI(); runCalculations(); }
-    function fmtDMS(deg) { let a=Math.abs(deg), d=Math.floor(a), m=Math.floor((a-d)*60), s=((a-d)*60-m)*60; return `${deg<0?'-':''}${d}° ${m.toString().padStart(2,'0')}' ${s.toFixed(2).padStart(5,'0')}"`; }
-    
+    function fmtDMS(deg) { let a=Math.abs(deg), d=Math.floor(a), m=Math.floor((a-d)*60), s=((a-d)*60-m)*60; return `${deg<0?'-':''}${d}° ${m.toString().padStart(2,'0')}' ${s.toFixed(2).padStart(5,'0')}"`; }    
     const fmtT = d => {
         if (!d || isNaN(d.getTime())) return "--:--:--";
         let tzOffset = parseFloat(document.getElementById('in-tz').value) || 0;
@@ -724,7 +609,6 @@ color:green">
         return nd.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
     };
 
-    // --- LUKIS SVG ---
     function drawCompassFace() {
         const svg = document.getElementById('svg-horizontal'); let h = `<circle cx="160" cy="160" r="140" stroke="#444" fill="white" stroke-width="2"/>`;
         for(let i=0; i<360; i+=10) {
@@ -732,7 +616,6 @@ color:green">
             h += `<line x1="${160+(mj?125:132)*Math.cos(rad)}" y1="${160+(mj?125:132)*Math.sin(rad)}" x2="${160+140*Math.cos(rad)}" y2="${160+140*Math.sin(rad)}" stroke="#666" stroke-width="${mj?2:1}"/>`;
             if(mj && i%90!==0) h += `<text x="${160+112*Math.cos(rad)}" y="${164+112*Math.sin(rad)}" text-anchor="middle" font-size="10" fill="#888">${i}°</text>`;
         }
-        // PEMBETULAN: Huruf N, S, W, E diletakkan di luar bulatan (jejari di luar r=140)
         h += `<text x="160" y="15" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">N</text><text x="160" y="318" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">S</text><text x="10" y="167" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">W</text><text x="310" y="167" text-anchor="middle" font-weight="bold" font-size="20" fill="var(--primary)">E</text><line x1="160" y1="160" x2="160" y2="40" stroke="#ccc" stroke-dasharray="4,4" /><g id="h-dyn"></g>`;
         svg.innerHTML = h;
     }
@@ -759,20 +642,16 @@ color:green">
         return new Date((left+right)/2);
     }
 
-    // --- KIRAAN UTAMA ---
     function runCalculations() {
         if (!targetTime || isNaN(targetTime.getTime())) return;
-        
         const lat = userCoords.lat, lon = userCoords.lon, elev = parseFloat(document.getElementById('in-elev').value) || 0;
         const tz = parseFloat(document.getElementById('in-tz').value) || 0;
 
-        // 1. KIBLAT
         const kaaba = { lat: 21.422487, lon: 39.826206 }, dLon = (kaaba.lon - lon)*Math.PI/180;
         const y = Math.sin(dLon), x = Math.cos(lat*Math.PI/180)*Math.tan(kaaba.lat*Math.PI/180) - Math.sin(lat*Math.PI/180)*Math.cos(dLon);
         const qAz = (Math.atan2(y, x)*180/Math.PI + 360)%360;
         document.getElementById('dms-qibla').innerText = fmtDMS(qAz);
 
-        // 2. MATAHARI & BULAN
         const sPos = SunCalc.getPosition(targetTime, lat, lon), mPos = SunCalc.getMoonPosition(targetTime, lat, lon);
         const sAz = (sPos.azimuth*180/Math.PI + 180)%360, sAlt = sPos.altitude*180/Math.PI, shAz = (sAz+180)%360;
         const mAz = (mPos.azimuth*180/Math.PI + 180)%360, mAlt = mPos.altitude*180/Math.PI;
@@ -782,13 +661,11 @@ color:green">
         document.getElementById('dms-moon-az').innerText = fmtDMS(mAz); document.getElementById('dms-moon-alt').innerText = fmtDMS(mAlt);
         document.getElementById('sun-status-text').innerHTML = sAlt > 0 ? `<span style="color:var(--accent)">☀️ Matahari di ufuk. Ada bayang.</span>` : `<span style="color:var(--primary)">🌌 Matahari tiada.</span>`;
 
-        // 3. SVG UPDATE
         const hDyn = document.getElementById('h-dyn'), cx=160, rQ=(qAz-90)*Math.PI/180, rS=(sAz-90)*Math.PI/180, rM=(mAz-90)*Math.PI/180, rSh=(shAz-90)*Math.PI/180;
         hDyn.innerHTML = `<line x1="${cx}" y1="${cx}" x2="${cx+120*Math.cos(rQ)}" y2="${cx+120*Math.sin(rQ)}" stroke="var(--qibla)" stroke-width="3"/><text x="${cx+135*Math.cos(rQ)}" y="${cx+135*Math.sin(rQ)+5}" font-size="16">🕋</text><line x1="${cx}" y1="${cx}" x2="${cx+100*Math.cos(rS)}" y2="${cx+100*Math.sin(rS)}" stroke="var(--sun)" stroke-width="3"/><text x="${cx+115*Math.cos(rS)}" y="${cx+115*Math.sin(rS)+5}" font-size="20">☀️</text><line x1="${cx}" y1="${cx}" x2="${cx+85*Math.cos(rM)}" y2="${cx+85*Math.sin(rM)}" stroke="var(--moon)" stroke-width="2" stroke-dasharray="3,2"/><text x="${cx+100*Math.cos(rM)}" y="${cx+100*Math.sin(rM)+5}" font-size="16">🌙</text><line x1="${cx}" y1="${cx}" x2="${cx+140*Math.cos(rSh)}" y2="${cx+140*Math.sin(rSh)}" stroke="var(--shadow)" stroke-width="2"/>`;
         const vDyn = document.getElementById('v-dyn'), vc=15, vrS=-Math.max(-90,Math.min(90,sAlt))*Math.PI/180, vrM=-Math.max(-90,Math.min(90,mAlt))*Math.PI/180;
         vDyn.innerHTML = `<line x1="${vc}" y1="160" x2="${vc+130*Math.cos(vrS)}" y2="${160+130*Math.sin(vrS)}" stroke="var(--sun)" stroke-width="2"/><circle cx="${vc+130*Math.cos(vrS)}" cy="${160+130*Math.sin(vrS)}" r="6" fill="var(--sun)"/><text x="${vc+140*Math.cos(vrS)}" y="${160+130*Math.sin(vrS)+5}" font-size="16">☀️</text><line x1="${vc}" y1="160" x2="${vc+130*Math.cos(vrM)}" y2="${160+130*Math.sin(vrM)}" stroke="var(--moon)" stroke-dasharray="2,2"/><circle cx="${vc+130*Math.cos(vrM)}" cy="${160+130*Math.sin(vrM)}" r="5" fill="var(--moon)"/><text x="${vc+140*Math.cos(vrM)}" y="${160+130*Math.sin(vrM)+5}" font-size="14">🌙</text>`;
 
-        // 4. SOLAT
         let sVal = document.getElementById('sel-subuh').value; let suA = sVal === 'custom' ? parseFloat(document.getElementById('cust-subuh').value) || 18 : parseFloat(sVal);
         let iVal = document.getElementById('sel-isyak').value; let isA = iVal === 'custom' ? parseFloat(document.getElementById('cust-isyak').value) || 18 : parseFloat(iVal);
         
@@ -801,17 +678,9 @@ color:green">
         const hlMethod = document.getElementById('highlat-method').value;
         if(lat > 48 && tSu && tIs && tMg && tSy) {
             const nightDuration = tSy.getTime() - tMg.getTime();
-            if(hlMethod === 'middle') {
-                tSu = new Date(tSy.getTime() - nightDuration / 2);
-                tIs = new Date(tMg.getTime() + nightDuration / 2);
-            } else if(hlMethod === 'oneseventh') {
-                tSu = new Date(tSy.getTime() - nightDuration / 7);
-                tIs = new Date(tMg.getTime() + nightDuration / 7);
-            } else if(hlMethod === 'angle') {
-                const fajrPart = suA / 60; const ishaPart = isA / 60;
-                tSu = new Date(tSy.getTime() - nightDuration * fajrPart);
-                tIs = new Date(tMg.getTime() + nightDuration * ishaPart);
-            }
+            if(hlMethod === 'middle') { tSu = new Date(tSy.getTime() - nightDuration / 2); tIs = new Date(tMg.getTime() + nightDuration / 2); } 
+            else if(hlMethod === 'oneseventh') { tSu = new Date(tSy.getTime() - nightDuration / 7); tIs = new Date(tMg.getTime() + nightDuration / 7); } 
+            else if(hlMethod === 'angle') { const fajrPart = suA / 60; const ishaPart = isA / 60; tSu = new Date(tSy.getTime() - nightDuration * fajrPart); tIs = new Date(tMg.getTime() + nightDuration * ishaPart); }
         }
         
         let tAs = null;
@@ -828,14 +697,12 @@ color:green">
         calcDailyQiblaShadow(lat, lon, qAz, tSy, tMg);
 		updateAdvancedMapFeatures();
 
-        // 5. ASTROFOTO (PEMBETULAN: Membuang pepijat .slice() yang memotong data rentetan)
         const tms = SunCalc.getTimes(targetTime, lat, lon);
         document.getElementById('astro-gold-am').innerText = fmtT(tms.goldenHourEnd); 
         document.getElementById('astro-blue-am').innerText = fmtT(tms.sunriseEnd);
         document.getElementById('astro-gold-pm').innerText = fmtT(tms.goldenHour); 
         document.getElementById('astro-blue-pm').innerText = fmtT(tms.dusk);
 
-        // 6. PLANET (PEMBETULAN: Menggunakan format tarikh tulen native Javascript Date)
         try {
             const obs = new Astronomy.Observer(lat, lon, elev);
             let plHtml = '';
@@ -845,11 +712,8 @@ color:green">
                 plHtml += `<div><span class="label" style="color:var(--astro);">${b}</span>Az: ${hor.azimuth.toFixed(1)}°<br>Alt: ${hor.altitude.toFixed(1)}°</div>`;
             });
             document.getElementById('planet-data').innerHTML = plHtml;
-        } catch(e) { 
-            document.getElementById('planet-data').innerHTML = "<div style='grid-column:1/-1; color:red;'>Data planet gagal dimuatkan.</div>"; 
-        }
+        } catch(e) { document.getElementById('planet-data').innerHTML = "<div style='grid-column:1/-1; color:red;'>Data planet gagal dimuatkan.</div>"; }
 
-        // 7. MOON & DARK SKY
         const mDist = mPos.distance; const mIllu = SunCalc.getMoonIllumination(targetTime);
         document.getElementById('res-moon-dist').innerText = `${Math.round(mDist)} km ${mDist < 360000 ? "⭐ (Supermoon!)" : ""}`;
         document.getElementById('res-moon-illu').innerText = `Iluminasi: ${(mIllu.fraction*100).toFixed(1)}%`;
@@ -865,285 +729,95 @@ color:green">
         if(!tSy || !tMg) { el.innerText = "Matahari tidak terbit/terbenam"; return; }
         let bestT = null, minD = 180, notice = "";
         for(let t = tSy.getTime(); t <= tMg.getTime(); t += 60000) {
-            let az = (SunCalc.getPosition(new Date(t), lat, lon).azimuth*180/Math.PI+180)%360;
-            let d1 = Math.abs(az-qAz); if(d1>180) d1=360-d1; let d2 = Math.abs(az-((qAz+180)%360)); if(d2>180) d2=360-d2;
+            let az = (SunCalc.getPosition(new Date(t), lat, lon).azimuth*180/Math.PI+180)%360; let d1 = Math.abs(az-qAz); if(d1>180) d1=360-d1; let d2 = Math.abs(az-((qAz+180)%360)); if(d2>180) d2=360-d2;
             if(d1 < minD) { minD = d1; bestT = t; notice = "Bayang MEMBELAKANGI arah Kiblat"; }
             if(d2 < minD) { minD = d2; bestT = t; notice = "Bayang MENGHALA arah Kiblat"; }
         }
         el.innerHTML = minD < 1 ? `${fmtT(new Date(bestT))} <br><small style="color:#555;">${notice}</small>` : "Tiada jajaran bayang Kiblat.";
     }
 	
-	//////////////////////////////////////////////////////
-// KOMPAS + KALMAN + AR
-//////////////////////////////////////////////////////
-
-let kalmanHeading=0;
-let kalmanError=1;
-let qiblaSensorRunning=false;
-
-class Kalman{
-
-constructor(){
-
-this.q=0.01;
-this.r=1;
-
-}
-
-filter(value){
-
-kalmanError+=this.q;
-
-let k=
-kalmanError/
-(kalmanError+this.r);
-
-kalmanHeading=
-kalmanHeading+
-k*
-(value-kalmanHeading);
-
-kalmanError=
-(1-k)
-*
-kalmanError;
-
-return kalmanHeading;
-
-}
-
-}
-
-const kalman=
-new Kalman();
-
-
-
-function toggleQiblaCompass(){
-
-if(
-document.getElementById(
-'chk-qibla-live'
-).checked
-){
-
-startQiblaCompass();
-
-}
-
-}
-
-
-
-async function startQiblaCompass(){
-
-if(qiblaSensorRunning)
-return;
-
-qiblaSensorRunning=true;
-
-
-if(typeof DeviceOrientationEvent
-!=="undefined"
-&&
-typeof DeviceOrientationEvent.requestPermission
-==="function"){
-
-try{
-
-await DeviceOrientationEvent.requestPermission();
-
-}catch(e){
-
-alert(
-"Sensor tidak dibenarkan"
-);
-
-return;
-
-}
-
-}
-
-
-
-window.addEventListener(
-
-'deviceorientation',
-
-function(e){
-
-let heading=
-360-(e.alpha||0);
-
-heading=
-(heading+360)%360;
-
-
-
-let smooth=
-
-kalman.filter(
-heading
-);
-
-
-
-const kaabaLat=
-21.422487;
-
-const kaabaLon=
-39.826206;
-
-
-
-let dLon=
-(kaabaLon-userCoords.lon)
-*Math.PI/180;
-
-
-
-let y=
-Math.sin(dLon);
-
-let x=
-Math.cos(
-userCoords.lat*Math.PI/180
-)
-
-*
-Math.tan(
-kaabaLat*Math.PI/180
-)
-
--
-
-Math.sin(
-userCoords.lat*Math.PI/180
-)
-
-*
-Math.cos(dLon);
-
-
-
-let qibla=
-(
-Math.atan2(
-y,
-x
-)
-
-*180/Math.PI
-
-+360
-
-)
-
-%360;
-
-
-
-let relative=
-qibla-smooth;
-
-
-
-document.getElementById(
-"qiblaNeedle"
-)
-
-.style.transform=
-
-`translate(-50%,-50%)
-rotate(${relative}deg)`;
-
-
-document.getElementById(
-"headingText"
-)
-
-innerHTML=
-
-`Arah Telefon:
-
-${smooth.toFixed(1)}°
-
-<br>
-
-Azimut Kiblat:
-
-${qibla.toFixed(1)}°`;
-
-
-
-if(
-document.getElementById(
-'chk-3d-arrow'
-).checked
-){
-
-rotate3DArrow(relative);
-
-}
-
-});
-
-}
-
-
-
-function toggle3DArrow(){
-
-}
-
-
-
-function rotate3DArrow(angle){
-
-let el=
-document.getElementById(
-"kaaba3D"
-);
-
-if(!el)
-return;
-
-el.setAttribute(
-
-'rotation',
-
-`0 0 ${angle}`
-
-);
-
-}
-
-
-
-function toggleAR(){
-
-const ar=
-document.getElementById(
-"arContainer"
-);
-
-ar.style.display=
-
-document.getElementById(
-'chk-ar'
-).checked
-
-?
-
-'block'
-
-:
-
-'none';
-
-}
-
+    // ===================================================
+    // KOD PEMBETULAN: KOMPAS + KALMAN + AR
+    // ===================================================
+    let kalmanHeading = 0;
+    let kalmanError = 1;
+    let qiblaSensorRunning = false;
+
+    class Kalman {
+        constructor() { this.q = 0.01; this.r = 1; }
+        filter(value) {
+            kalmanError += this.q;
+            let k = kalmanError / (kalmanError + this.r);
+            kalmanHeading = kalmanHeading + k * (value - kalmanHeading);
+            kalmanError = (1 - k) * kalmanError;
+            return kalmanHeading;
+        }
+    }
+
+    const kalman = new Kalman();
+
+    function toggleQiblaCompass() {
+        if(document.getElementById('chk-qibla-live').checked) { startQiblaCompass(); }
+    }
+
+    async function startQiblaCompass() {
+        if(qiblaSensorRunning) return;
+        qiblaSensorRunning = true;
+        if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+            try { await DeviceOrientationEvent.requestPermission(); } catch(e) { alert("Akses sensor peranti tidak dibenarkan."); return; }
+        }
+
+        window.addEventListener('deviceorientation', function(e) {
+            if(!document.getElementById('chk-qibla-live').checked) return;
+            
+            // Mengira heading kompas mutlak peranti
+            let heading = 360 - (e.alpha || 0);
+            heading = (heading + 360) % 360;
+            let smooth = kalman.filter(heading);
+
+            // Kira azimuth Kiblat semasa
+            const kaabaLat = 21.422487; const kaabaLon = 39.826206;
+            let dLon = (kaabaLon - userCoords.lon) * Math.PI / 180;
+            let y = Math.sin(dLon);
+            let x = Math.cos(userCoords.lat * Math.PI / 180) * Math.tan(kaabaLat * Math.PI / 180) - Math.sin(userCoords.lat * Math.PI / 180) * Math.cos(dLon);
+            let qibla = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+
+            // Sudut relatif penunjuk kompas terhadap orientasi telefon
+            let relative = qibla - smooth;
+
+            document.getElementById("qiblaNeedle").style.transform = `translate(-50%,-50%) rotate(${relative}deg)`;
+            
+            // PEMBETULAN: Ditambah titik (.) sebelum innerHTML untuk membaiki ralat skrip
+            document.getElementById("headingText").innerHTML = `Arah Telefon: ${smooth.toFixed(1)}°<br>Azimut Kiblat: ${qibla.toFixed(1)}°`;
+
+            if(document.getElementById('chk-3d-arrow').checked || document.getElementById('chk-ar').checked) {
+                rotate3DArrow(relative);
+            }
+        });
+    }
+
+    function toggle3DArrow() {
+        if(document.getElementById('chk-3d-arrow').checked) {
+            document.getElementById('arContainer').style.display = 'block';
+            startQiblaCompass();
+        } else if(!document.getElementById('chk-ar').checked) {
+            document.getElementById('arContainer').style.display = 'none';
+        }
+    }
+
+    function rotate3DArrow(angle) {
+        let el = document.getElementById("kaaba3D");
+        if(!el) return;
+        // PEMBETULAN: Menggunakan paksi Y (0 ${angle} 0) untuk putaran kompas AR yang tepat
+        el.setAttribute('rotation', `0 ${angle} 0`);
+    }
+
+    function toggleAR() {
+        const ar = document.getElementById("arContainer");
+        let active = document.getElementById('chk-ar').checked;
+        ar.style.display = active || document.getElementById('chk-3d-arrow').checked ? 'block' : 'none';
+        if(active) startQiblaCompass();
+    }
 </script>
 </body>
 </html>
