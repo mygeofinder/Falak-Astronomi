@@ -7,7 +7,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     
-    <!-- Memuatkan pustaka ikon FontAwesome -->
     <link rel="stylesheet" href="https://cloudflare.com">
 
     <style>
@@ -26,7 +25,6 @@
             color: #fff;
         }
 
-        /* Video AR Latar Belakang */
         #webcam-video {
             position: absolute;
             top: 0;
@@ -35,10 +33,9 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
-            display: none; /* Ditutup secara lalai */
+            display: none;
         }
 
-        /* Antaramuka Pengguna (UI Overlay) */
         .ui-container {
             position: absolute;
             top: 0;
@@ -50,30 +47,29 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 30px 20px;
-            background: rgba(0, 0, 0, 0.4);
+            padding: 25px 20px;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         header {
             text-align: center;
-            backdrop-filter: blur(5px);
-            background: rgba(0, 0, 0, 0.6);
-            padding: 15px 25px;
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.65);
+            padding: 12px 20px;
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         h1 {
-            font-size: 1.4rem;
-            letter-spacing: 1px;
+            font-size: 1.3rem;
             color: #ffd700;
         }
 
-        /* Reka Bentuk Kompas */
+        /* Kompas Luaran */
         .compass-wrapper {
             position: relative;
-            width: 280px;
-            height: 280px;
+            width: 300px;
+            height: 300px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -83,20 +79,56 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 8px solid #ffd700;
-            background: rgba(0, 0, 0, 0.7);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            border: 6px solid #ffd700;
+            background: rgba(10, 10, 10, 0.85);
+            box-shadow: 0 0 25px rgba(215, 175, 0, 0.3);
             position: relative;
-            transition: transform 0.1s ease-out;
+            /* Dibuat linear lancar melalui JS */
+            transition: transform 0.1s linear; 
         }
 
-        /* Penunjuk Arah Mata Angin */
+        /* Senggatan & Angka Darjah */
+        .ticks-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tick {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            left: calc(50% - 1px);
+            top: 0;
+            transform-origin: 1px 150px;
+        }
+
+        .tick.major {
+            height: 14px;
+            background: #ffd700;
+            width: 2px;
+        }
+
+        .tick-label {
+            position: absolute;
+            width: 30px;
+            text-align: center;
+            font-size: 0.65rem;
+            color: #ccc;
+            left: calc(50% - 15px);
+            top: 16px;
+            transform-origin: 15px 134px;
+        }
+
+        /* Mata Angin Utama */
         .rose {
             position: absolute;
             width: 100%;
             height: 100%;
             font-weight: bold;
             font-size: 1.2rem;
+            z-index: 2;
         }
 
         .direction {
@@ -104,78 +136,162 @@
             width: 30px;
             text-align: center;
         }
+        .dir-n { top: 32px; left: calc(50% - 15px); color: #ff4d4d; font-size: 1.3rem;}
+        .dir-e { right: 32px; top: calc(50% - 12px); color: #fff; }
+        .dir-s { bottom: 32px; left: calc(50% - 15px); color: #fff; }
+        .dir-w { left: 32px; top: calc(50% - 12px); color: #fff; }
 
-        .dir-n { top: 10px; left: calc(50% - 15px); color: #ff4d4d; }
-        .dir-e { right: 10px; top: calc(50% - 12px); color: #fff; }
-        .dir-s { bottom: 10px; left: calc(50% - 15px); color: #fff; }
-        .dir-w { left: 10px; top: calc(50% - 12px); color: #fff; }
-
-        /* Jarum Kiblat */
+        /* Jarum Penunjuk Kiblat Tradisional */
         .qibla-arrow {
             position: absolute;
             width: 0;
             height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 40px solid #00ffcc;
-            top: 20px;
-            left: calc(50% - 15px);
-            filter: drop-shadow(0 0 8px #00ffcc);
-            display: none; /* Muncul selepas lokasi diperoleh */
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 45px solid #00ffcc;
+            top: 40px;
+            left: calc(50% - 12px);
+            filter: drop-shadow(0 0 6px #00ffcc);
+            transform-origin: 12px 110px;
+            display: none;
+            z-index: 3;
         }
 
-        /* Ikon Kaabah di Tengah */
+        /* Ikon Kaabah di Tengah Kompas */
         .kaaba-center {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background-color: #ffd700;
-            color: #000;
+            width: 44px;
+            height: 44px;
+            background: #111;
+            color: #ffd700;
+            border: 2px solid #ffd700;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
-            z-index: 3;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-size: 1.3rem;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
 
-        /* Ruangan Info Status */
+        /* GARISAN LURUS AR & INDIKATOR KAABAH TERAPUNG */
+        .ar-overlay-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            display: none; 
+        }
+
+        /* Garis Panduan Tegak Tengah Skrin */
+        .ar-guide-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,255,204,0), rgba(0,255,204,0.7) 50%, rgba(0,255,204,0));
+            transform: translateX(-50%);
+        }
+
+        /* Ikon Terapung Kaabah dalam Mod AR */
+        .ar-kaaba-target {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+            transition: left 0.1s linear; /* Bergerak selari dengan pusingan telefon */
+        }
+
+        .ar-kaaba-target i {
+            font-size: 3.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #00ffcc;
+        }
+
+        .ar-kaaba-target span {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 5px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        /* ISYARAT ANAK PANAH KANAN / KIRI BERKELIP */
+        .turn-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 3.5rem;
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            display: none;
+            animation: blink 0.6s infinite alternate;
+            z-index: 5;
+        }
+
+        #turn-left { left: 25px; }
+        #turn-right { right: 25px; }
+
+        @keyframes blink {
+            0% { opacity: 0.2; transform: translateY(-50%) scale(0.9); }
+            100% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+        }
+
+        /* Tanda Sempurna Tepat Arah Kiblat */
+        .perfect-match {
+            animation: pulse-green 0.5s infinite alternate;
+            border-color: #00ffcc !important;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.8) !important;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+
         .info-panel {
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             padding: 15px;
-            border-radius: 12px;
+            border-radius: 15px;
             text-align: center;
             font-size: 0.9rem;
-            max-width: 90%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 92%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
         }
 
-        /* Butang Kawalan */
         .controls {
             display: flex;
             gap: 15px;
-            margin-top: 10px;
+            margin-top: 12px;
+            justify-content: center;
         }
 
         button {
             background: #ffd700;
             color: #000;
             border: none;
-            padding: 12px 20px;
-            font-size: 1rem;
+            padding: 10px 18px;
+            font-size: 0.95rem;
             font-weight: bold;
             border-radius: 25px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
-        }
-
-        button:active {
-            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
 
         button.btn-ar-active {
@@ -186,22 +302,34 @@
 </head>
 <body>
 
-    <!-- Elemen Kamera AR -->
     <video id="webcam-video" autoplay playsinline muted></video>
 
-    <!-- UI Overlay -->
+    <!-- Visual Tambahan AR -->
+    <div class="ar-overlay-view" id="arOverlay">
+        <div class="ar-guide-line"></div>
+        <div class="ar-kaaba-target" id="arKaabaTarget">
+            <i class="fa-solid fa-kaaba"></i>
+            <span>KIBLAT</span>
+        </div>
+    </div>
+
+    <!-- Isyarat Gerak Sisi Telefon -->
+    <div class="turn-indicator" id="turn-left"><i class="fa-solid fa-chevron-left"></i></div>
+    <div class="turn-indicator" id="turn-right"><i class="fa-solid fa-chevron-right"></i></div>
+
     <div class="ui-container">
         <header>
             <h1>Falak Astronomi INSTUN</h1>
-            <p style="font-size: 0.8rem; color: #aaa;">Kompas Kiblat AR PWA</p>
+            <p style="font-size: 0.75rem; color: #bbb; margin-top:2px;">Kompas Isyarat Navigasi AR v2.0</p>
         </header>
 
-        <!-- Kompas -->
         <div class="compass-wrapper">
-            <div class="kaaba-center">
+            <div class="kaaba-center" id="centerKaabaIcon">
                 <i class="fa-solid fa-kaaba"></i>
             </div>
             <div class="compass" id="compassRing">
+                <!-- Senggatan akan dijana di sini menerusi JS -->
+                <div class="ticks-container" id="ticksContainer"></div>
                 <div class="rose">
                     <div class="direction dir-n">U</div>
                     <div class="direction dir-e">T</div>
@@ -212,29 +340,29 @@
             </div>
         </div>
 
-        <!-- Panel Maklumat & Butang -->
         <div class="info-panel">
-            <p id="status-text"><i class="fa-solid fa-spinner fa-spin"></i> Mengesan lokasi anda...</p>
-            <p id="angle-text" style="margin-top: 5px; color: #00ffcc; font-weight: bold;"></p>
+            <p id="status-text"><i class="fa-solid fa-spinner fa-spin"></i> Menjejak isyarat satelit...</p>
+            <p id="angle-text" style="margin-top: 4px; color: #00ffcc; font-weight: bold; min-height: 20px;"></p>
             
             <div class="controls">
-                <button id="btn-location" onclick="getLocation()"><i class="fa-solid fa-location-crosshairs"></i> Reset Lokasi</button>
+                <button id="btn-location" onclick="getLocation()"><i class="fa-solid fa-location-crosshairs"></i> Reset GPS</button>
                 <button id="btn-ar" onclick="toggleAR()"><i class="fa-solid fa-camera"></i> Aktif AR</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Koordinat Kaabah (Makkah)
         const KAABA_LAT = 21.4225;
         const KAABA_LNG = 39.8262;
 
-        let userLat = null;
-        let userLng = null;
-        let qiblaAngle = null;
+        let userLat, userLng, qiblaAngle = null;
         let currentHeading = 0;
+        let smoothedHeading = 0; // Menyimpan nilai kompas yang telah ditapis
         let isARActive = false;
         let videoStream = null;
+
+        // Faktor penapisan Low-Pass (0.1 = Sangat stabil/perlahan, 0.3 = Sederhana responsif, 1.0 = Tanpa tapisan)
+        const FILTER_FACTOR = 0.15; 
 
         const compassRing = document.getElementById('compassRing');
         const qiblaArrow = document.getElementById('qiblaArrow');
@@ -242,31 +370,54 @@
         const angleText = document.getElementById('angle-text');
         const btnAR = document.getElementById('btn-ar');
         const videoElement = document.getElementById('webcam-video');
+        const arOverlay = document.getElementById('arOverlay');
+        const arKaabaTarget = document.getElementById('arKaabaTarget');
+        const turnLeftElement = document.getElementById('turn-left');
+        const turnRightElement = document.getElementById('turn-right');
+        const centerKaabaIcon = document.getElementById('centerKaabaIcon');
 
-        // 1. Pengiraan Arah Kiblat (Formula Great Circle Distance)
+        // Generate Senggatan Kompas 10 Darjah secara Automatik
+        function createCompassTicks() {
+            const container = document.getElementById('ticksContainer');
+            for (let i = 0; i < 360; i += 10) {
+                if (i === 0 || i === 90 || i === 180 || i === 270) continue; // Langkau mata angin utama
+                
+                const isMajor = i % 30 === 0;
+                const tick = document.createElement('div');
+                tick.className = `tick ${isMajor ? 'major' : ''}`;
+                tick.style.transform = `rotate(${i}deg)`;
+                container.appendChild(tick);
+
+                if (isMajor) {
+                    const label = document.createElement('div');
+                    label.className = 'tick-label';
+                    label.innerText = i;
+                    label.style.transform = `rotate(${i}deg)`;
+                    container.appendChild(label);
+                }
+            }
+        }
+        createCompassTicks();
+
         function calculateQibla(lat, lng) {
             const phiK = KAABA_LAT * Math.PI / 180;
             const lambdaK = KAABA_LNG * Math.PI / 180;
             const phiU = lat * Math.PI / 180;
             const lambdaU = lng * Math.PI / 180;
-
             const deltaLambda = lambdaK - lambdaU;
 
             const y = Math.sin(deltaLambda);
             const x = Math.cos(phiU) * Math.tan(phiK) - Math.sin(phiU) * Math.cos(deltaLambda);
-            
             let qibla = Math.atan2(y, x) * 180 / Math.PI;
-            qibla = (qibla + 360) % 360;
-            return qibla;
+            return (qibla + 360) % 360;
         }
 
-        // 2. Mendapatkan Lokasi Pengguna
         function getLocation() {
             if (!navigator.geolocation) {
-                statusText.innerHTML = "Geolokasi tidak disokong oleh pelayar anda.";
+                statusText.innerHTML = "Geolokasi tidak disokong pelayar.";
                 return;
             }
-            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Mengesan GPS...`;
+            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Membaca data GPS...`;
             
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -274,113 +425,164 @@
                     userLng = position.coords.longitude;
                     qiblaAngle = calculateQibla(userLat, userLng);
                     
-                    statusText.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#00ffcc"></i> Lokasi dikesan berdekatan.`;
-                    angleText.innerHTML = `Sudut Kiblat: ${qiblaAngle.toFixed(2)}° dari Utara`;
+                    statusText.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#00ffcc"></i> GPS Berjaya Disahihkan.`;
                     
-                    // Paparkan jarum kiblat pada kompas
                     qiblaArrow.style.display = 'block';
                     qiblaArrow.style.transform = `rotate(${qiblaAngle}deg)`;
                     
                     initCompass();
                 },
                 (error) => {
-                    statusText.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#ff4d4d"></i> Gagal akses GPS. Sila benarkan lokasi.`;
+                    statusText.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:#ff4d4d"></i> Aktifkan GPS anda & benarkan akses lokasi.`;
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
             );
         }
 
-        // 3. Sensor Kompas (Orientasi Peranti)
         function initCompass() {
             if (window.DeviceOrientationEvent) {
-                // Untuk peranti iOS (iPhone) yang memerlukan kebenaran khas
                 if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission()
-                        .then(permissionState => {
-                            if (permissionState === 'granted') {
+                        .then(state => {
+                            if (state === 'granted') {
                                 window.addEventListener('deviceorientation', handleOrientation, true);
-                            } else {
-                                statusText.innerHTML = "Kebenaran kompas ditolak.";
                             }
-                        })
-                        .catch(console.error);
+                        }).catch(console.error);
                 } else {
-                    // Peranti Android / Pelayar biasa
                     window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                    // Sandaran jika jenis absolute tidak disokong
                     window.addEventListener('deviceorientation', handleOrientation, true);
                 }
+                // Mulakan loop animasi penstabilan
+                requestAnimationFrame(updateCompassSmoothly);
             } else {
-                statusText.innerHTML = "Sensor orientasi tidak disokong peranti ini.";
+                statusText.innerHTML = "Peranti tiada sensor orientasi.";
             }
         }
 
         function handleOrientation(event) {
-            // Mengambil data heading berdasarkan sistem operasi peranti
+            let heading = 0;
             if (event.webkitCompassHeading) {
-                currentHeading = event.webkitCompassHeading; // iOS
+                heading = event.webkitCompassHeading;
             } else if (event.alpha) {
-                currentHeading = 360 - event.alpha; // Android (Kiraan arah berbalik)
-                if(event.absolute === false) {
-                   // Amaran jika kompas kurang tepat tanpa mod absolute
-                   angleText.innerHTML = `Sudut Kiblat: ${qiblaAngle.toFixed(2)}° <br><span style="font-size:0.7rem;color:#ff4d4d;">(Gerakkan peranti membentuk angka 8 untuk kalibrasi)</span>`;
-                }
+                heading = 360 - event.alpha;
             }
-
-            // Memusingkan piring kompas mengikut arah peranti dipusing
-            compassRing.style.transform = `rotate(${-currentHeading}deg)`;
+            currentHeading = heading;
         }
 
-        // 4. Fungsi Aktif / Nyahaktif Video AR Kamera
+        // Fungsi Menstabilkan Putaran Kompas (Low-pass Filter Matematik)
+        function updateCompassSmoothly() {
+            if (qiblaAngle !== null) {
+                // Selesaikan isu lompatan sudut pada titik 0/360 darjah
+                let diff = currentHeading - smoothedHeading;
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+
+                smoothedHeading += diff * FILTER_FACTOR;
+                smoothedHeading = (smoothedHeading + 360) % 360;
+
+                // Putarkan piring kompas utama
+                compassRing.style.transform = `rotate(${-smoothedHeading}deg)`;
+
+                // Hitung perbezaan sudut antara hala telefon dengan arah kiblat nyata
+                let relativeQiblaAngle = (qiblaAngle - smoothedHeading + 360) % 360;
+                if (relativeQiblaAngle > 180) relativeQiblaAngle -= 360;
+
+                // Kemaskini teks info darjah semasa
+                angleText.innerHTML = `Kiblat: ${qiblaAngle.toFixed(1)}° | Sisihan: ${relativeQiblaAngle.toFixed(1)}°`;
+
+                // LOGIK NAVIGASI KANAN / KIRI & MOD AR
+                // Sempurna/Tepat jika sisihan kurang daripada 3 darjah
+                if (Math.abs(relativeQiblaAngle) < 3) {
+                    turnLeftElement.style.display = 'none';
+                    turnRightElement.style.display = 'none';
+                    compassRing.classList.add('perfect-match');
+                    centerKaabaIcon.style.background = '#00ffcc';
+                    centerKaabaIcon.style.color = '#000';
+                    statusText.innerHTML = `<span style="color:#00ffcc; font-weight:bold;"><i class="fa-solid fa-square-check"></i> Menghadap Kiblat Tepat!</span>`;
+                } else {
+                    compassRing.classList.remove('perfect-match');
+                    centerKaabaIcon.style.background = '#111';
+                    centerKaabaIcon.style.color = '#ffd700';
+                    statusText.innerHTML = `Pusingkan telefon mengikut anak panah petunjuk.`;
+
+                    // Tunjukkan isyarat panah perlu pusing ke mana
+                    if (relativeQiblaAngle > 0) {
+                        turnRightElement.style.display = 'block';
+                        turnLeftElement.style.display = 'none';
+                    } else {
+                        turnLeftElement.style.display = 'block';
+                        turnRightElement.style.display = 'none';
+                    }
+                }
+
+                // Pengiraan kedudukan Ikon Kaabah Terapung apabila kamera AR aktif
+                if (isARActive) {
+                    const screenWidth = window.innerWidth;
+                    // Field of View anggaran kamera telefon biasa (~60 darjah paparan skrin)
+                    const fov = 60; 
+                    
+                    if (Math.abs(relativeQiblaAngle) < (fov / 2)) {
+                        // Jika arah kiblat ada dalam skrin kamera, posisikan secara dinamik
+                        let percentX = 50 + (relativeQiblaAngle / (fov / 2)) * 50;
+                        arKaabaTarget.style.display = 'flex';
+                        arKaabaTarget.style.left = `${percentX}%`;
+                    } else {
+                        // Jika terkeluar skrin kamera, sembunyikan ikon sasaran AR tersebut
+                        arKaabaTarget.style.display = 'none';
+                    }
+                }
+            }
+            requestAnimationFrame(updateCompassSmoothly);
+        }
+
         async function toggleAR() {
             if (!isARActive) {
-                // Aktifkan Kamera
                 try {
                     const constraints = {
-                        video: { facingMode: { exact: "environment" } }, // Guna kamera belakang
+                        video: { facingMode: { exact: "environment" } },
                         audio: false
                     };
                     videoStream = await navigator.mediaDevices.getUserMedia(constraints);
                     videoElement.srcObject = videoStream;
                     videoElement.style.display = 'block';
+                    arOverlay.style.display = 'block';
                     
-                    btnAR.innerHTML = `<i class="fa-solid fa-camera-roated"></i> Tutup AR`;
+                    btnAR.innerHTML = `<i class="fa-solid fa-camera-rotate"></i> Matikan AR`;
                     btnAR.classList.add('btn-ar-active');
                     isARActive = true;
                 } catch (err) {
-                    // Cuba kamera biasa jika kamera belakang (exact environment) tiada/gagal
                     try {
                         videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                         videoElement.srcObject = videoStream;
                         videoElement.style.display = 'block';
-                        btnAR.innerHTML = `<i class="fa-solid fa-camera-retro"></i> Tutup AR`;
+                        arOverlay.style.display = 'block';
+                        btnAR.innerHTML = `<i class="fa-solid fa-camera-rotate"></i> Matikan AR`;
                         btnAR.classList.add('btn-ar-active');
                         isARActive = true;
                     } catch (e) {
-                        alert("Gagal mengakses kamera peranti untuk fungsi AR: " + e.message);
+                        alert("Kamera tidak dapat diakses: " + e.message);
                     }
                 }
             } else {
-                // Nyahaktifkan Kamera
                 if (videoStream) {
                     videoStream.getTracks().forEach(track => track.stop());
                 }
                 videoElement.style.display = 'none';
+                arOverlay.style.display = 'none';
                 btnAR.innerHTML = `<i class="fa-solid fa-camera"></i> Aktif AR`;
                 btnAR.classList.remove('btn-ar-active');
                 isARActive = false;
+                
+                // Padam penunjuk arah tepi skrin jika mod AR dimatikan supaya kemas
+                turnLeftElement.style.display = 'none';
+                turnRightElement.style.display = 'none';
             }
         }
 
-        // Jalankan pengesanan lokasi sebaik sahaja aplikasi dibuka
         window.onload = () => {
             getLocation();
-            
-            // Pendaftaran Service Worker untuk keupayaan PWA
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js')
-                .then(() => console.log("Service Worker Berjaya Didaftarkan"))
-                .catch(err => console.log("Gagal daftar Service Worker", err));
+                navigator.serviceWorker.register('sw.js').catch(console.log);
             }
         };
     </script>
