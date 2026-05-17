@@ -58,6 +58,8 @@
             padding: 12px 20px;
             border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 340px;
         }
 
         h1 {
@@ -180,7 +182,7 @@
             text-shadow: 0 0 5px #000;
         }
 
-        /* PERBAIKAN CANGKERANG TIMBANG AIR (LEVEL BUBBLE) - BERADA TEPAT DI TENGAH */
+        /* KONTANIER TIMBANG AIR TEPAT DI TENGAH PIRING KOMPAS */
         .bubble-level-container {
             position: absolute;
             width: 70px;
@@ -206,11 +208,10 @@
             opacity: 0.7;
         }
 
-        /* BUIH HIJAU DIPERBESAR */
         .bubble {
             position: absolute;
-            width: 18px; /* Dibesarkan daripada 14px */
-            height: 18px; /* Dibesarkan daripada 14px */
+            width: 18px;
+            height: 18px;
             background: radial-gradient(circle, #7fff00 20%, #00ff00 80%);
             border-radius: 50%;
             box-shadow: 0 0 8px #00ff00;
@@ -241,41 +242,43 @@
             filter: drop-shadow(0 0 8px #00ff00);
         }
 
-        /* PERBAIKAN STRUKTUR PANDUAN INDIKATOR SISI ATAS (SISI KIRI & SISI KANAN) */
+        /* STRUKTUR BARU INDIKATOR ARROW HEAD (SISI KIRI & SISI KANAN ATAS AR VIDEO) */
         .ar-top-navigation {
             position: absolute;
-            top: 40px;
+            top: 110px; /* Diturunkan sedikit dari kedudukan header */
             width: 100%;
-            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 30px;
             pointer-events: none;
             z-index: 10;
         }
 
-        /* Rekabentuk Kepala Anak Panah Telus Tanpa Latar Belakang Kotak/Butang */
-        .nav-arrow {
-            position: absolute;
-            font-size: 3.5rem;
-            color: #00ff00;
-            filter: drop-shadow(0 0 12px #00ff00);
+        /* Reka bentuk Kepala Anak Panah Menggunakan CSS Murni (Telus Sepenuhnya) */
+        .nav-arrow-box {
+            width: 40px;
+            height: 40px;
             display: none;
-            line-height: 1;
-            background: none !important;
-            border: none !important;
-            box-shadow: none !important;
             animation: blink-arrow 0.3s infinite alternate;
         }
 
-        #arrow-left {
-            left: 25px; /* Tetap di Sisi Kiri Atas AR */
+        #arrow-left-box {
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-right: 20px solid #00ff00; /* Kepala anak panah menunjuk ke kiri */
+            filter: drop-shadow(-4px 0 8px #00ff00);
         }
 
-        #arrow-right {
-            right: 25px; /* Tetap di Sisi Kanan Atas AR */
+        #arrow-right-box {
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-left: 20px solid #00ff00; /* Kepala anak panah menunjuk ke kanan */
+            filter: drop-shadow(4px 0 8px #00ff00);
         }
 
         @keyframes blink-arrow {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
+            0% { opacity: 0.2; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
         }
 
         /* IKON KAABAH GERAKAN AR */
@@ -316,6 +319,7 @@
             letter-spacing: 1px;
         }
 
+        /* Efek Piring Berubah Warna & Denyutan Apabila Tepat Kiblat (Ralat 0) */
         .perfect-match {
             animation: pulse-green 0.4s infinite alternate;
             border-color: #00ff00 !important;
@@ -324,7 +328,7 @@
 
         @keyframes pulse-green {
             0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
+            100% { transform: scale(1.04); }
         }
 
         .info-panel {
@@ -353,10 +357,31 @@
             box-shadow: 0 4px 15px rgba(255,215,0,0.3);
         }
 
+        /* BUTANG KALIBRASI GPS MANUAL */
+        .btn-gps {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-gps:active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .status-text {
             font-size: 0.8rem;
             color: #aaa;
-            margin-top: 5px;
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -364,10 +389,10 @@
 
     <video id="webcam-video" autoplay playsinline muted></video>
 
-    <!-- Struktur Indikator Sisi Kiri Dan Kanan Berasingan -->
+    <!-- Indikator Arrow Head Kiri Dan Kanan Berasingan Berasaskan Objek Grafik CSS Murni -->
     <div class="ar-top-navigation">
-        <div id="arrow-left" class="nav-arrow">🖝</div> <!-- Menggunakan Kepala Anak Panah Sahaja -->
-        <div id="arrow-right" class="nav-arrow">🖜</div>
+        <div id="arrow-left-box" class="nav-arrow-box"></div>
+        <div id="arrow-right-box" class="nav-arrow-box"></div>
     </div>
 
     <div id="ar-view" class="ar-overlay-view">
@@ -391,7 +416,7 @@
             
             <div id="compass-plate" class="compass">
                 
-                <!-- Kontainer Timbang Air Ditandakan Tetap Ditengah Piring -->
+                <!-- Timbang Air Tetap Ditengah Piring Kompas -->
                 <div class="bubble-level-container">
                     <div class="bubble-target"></div>
                     <div id="level-bubble" class="bubble"></div>
@@ -415,16 +440,21 @@
 
         <div class="info-panel">
             <div id="data-debug">Sila benarkan akses Sensor & Kamera</div>
+            
+            <!-- Mengembalikan Butang Kalibrasi GPS Semula -->
+            <button id="btn-gps-calibrate" class="btn-gps">
+                <i class="fas fa-sync-alt"></i> KEMAS KINI / KALIBRASI GPS
+            </button>
+            
             <button id="btn-toggle-ar" class="btn-ar">BUKA VIDEO AR</button>
             <div class="status-text">Pastikan peranti diletakkan rata untuk ketepatan optimum</div>
         </div>
     </div>
 
     <script>
-        // --- 1. OPTIMASI KALMAN FILTER (MENGHAPUSKAN KELEWATAN / LAG & MEMASTIKAN REAKSI TEPAT) ---
+        // --- 1. OPTIMASI KALMAN FILTER (STABIL DAN SENTIASA RESPONSIVE TANPA LAG) ---
         class KalmanFilter {
-            constructor(q = 0.4, r = 0.1, x = 0, p = 1) { 
-                // Nilai q dinaikkan ke 0.4 dan r dikurangkan ke 0.1 supaya pergerakan dikesan serta-merta tanpa lag
+            constructor(q = 0.1, r = 0.4, x = 0, p = 1) { 
                 this.q = q; 
                 this.r = r; 
                 this.x = x; 
@@ -449,7 +479,7 @@
             }
         }
 
-        const compassFilter = new KalmanFilter(0.4, 0.1, 0, 1);
+        const compassFilter = new KalmanFilter(0.1, 0.4, 0, 1);
 
         // --- 2. PEMBAHAGIAN ELEMEN UI ---
         const compassPlate = document.getElementById('compass-plate');
@@ -458,13 +488,14 @@
         const qiblaAngleDisplay = document.getElementById('qibla-angle-display');
         const dataDebug = document.getElementById('data-debug');
         const btnToggleAr = document.getElementById('btn-toggle-ar');
+        const btnGpsCalibrate = document.getElementById('btn-gps-calibrate');
         const webcamVideo = document.getElementById('webcam-video');
         const arView = document.getElementById('ar-view');
         const arKaaba = document.getElementById('ar-kaaba');
         const levelBubble = document.getElementById('level-bubble');
         
-        const arrowLeft = document.getElementById('arrow-left');
-        const arrowRight = document.getElementById('arrow-right');
+        const arrowLeftBox = document.getElementById('arrow-left-box');
+        const arrowRightBox = document.getElementById('arrow-right-box');
 
         let userLat = 3.1390;
         let userLon = 101.6869;
@@ -512,21 +543,29 @@
             return (qiblaDeg + 360) % 360;
         }
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                userLat = position.coords.latitude;
-                userLon = position.coords.longitude;
-                qiblaAzimuth = calculateQibla(userLat, userLon);
-                
-                qiblaAngleDisplay.innerText = `Azimut Kiblat: ${qiblaAzimuth.toFixed(2)}°`;
-                qiblaPointer.style.transform = `rotate(${qiblaAzimuth}deg)`;
-                qiblaPointer.style.display = 'block';
-            }, error => {
-                qiblaAngleDisplay.innerText = `Kiblat (Anggaran): ${qiblaAzimuth.toFixed(2)}°`;
-                qiblaPointer.style.transform = `rotate(${qiblaAzimuth}deg)`;
-                qiblaPointer.style.display = 'block';
-            }, { enableHighAccuracy: true });
+        function updateLocation() {
+            if (navigator.geolocation) {
+                qiblaAngleDisplay.innerText = "Mengemas kini GPS...";
+                navigator.geolocation.getCurrentPosition(position => {
+                    userLat = position.coords.latitude;
+                    userLon = position.coords.longitude;
+                    qiblaAzimuth = calculateQibla(userLat, userLon);
+                    
+                    qiblaAngleDisplay.innerText = `Azimut Kiblat: ${qiblaAzimuth.toFixed(2)}°`;
+                    qiblaPointer.style.transform = `rotate(${qiblaAzimuth}deg)`;
+                    qiblaPointer.style.display = 'block';
+                }, error => {
+                    qiblaAngleDisplay.innerText = `Kiblat (Anggaran): ${qiblaAzimuth.toFixed(2)}°`;
+                    qiblaPointer.style.transform = `rotate(${qiblaAzimuth}deg)`;
+                    qiblaPointer.style.display = 'block';
+                }, { enableHighAccuracy: true, timeout: 10000 });
+            }
         }
+        // Jalankan carian lokasi automatik pada permulaan apl
+        updateLocation();
+
+        // Tambah fungsi klik pada butang kalibrasi GPS manual
+        btnGpsCalibrate.addEventListener('click', updateLocation);
 
         // --- 5. PEMROSESAN ORIENTASI & PANDUAN NAVIGASI REAL-TIME ---
         function handleOrientation(event) {
@@ -538,60 +577,62 @@
                 heading = (360 - heading) % 360;
             }
 
-            // Memproses nilai input mentah peranti dengan penapis berprestasi tinggi tanpa lag
+            // Memproses nilai input mentah peranti dengan penapis stabil
             currentHeading = compassFilter.filter(heading);
 
-            // Putaran piring kompas
+            // Putaran piring kompas (Utara kompas kekal di Utara Sebenar bumi)
             compassPlate.style.transform = `rotate(${-currentHeading}deg)`;
 
+            // PEMBETULAN: Logik perbezaan darjah ralat yang mematuhi hukum pusingan kompas
             let diff = qiblaAzimuth - currentHeading;
             if (diff > 180) diff -= 360;
             if (diff < -180) diff += 360;
 
-            // Memperbetulkan pepijat pergerakan kedudukan sasaran Kaabah di skrin AR
+            // Memposisikan sasaran visual Kaabah di skrin AR
             const fov = 75; 
             if (Math.abs(diff) < fov / 2) {
                 arKaaba.style.display = 'flex';
                 const xPos = 50 + (diff / (fov / 2)) * 50;
-                arKaaba.style.left = `${xPos}%`; // Pembetulan kod dari .style.style.left sebelum ini
+                arKaaba.style.left = `${xPos}%`;
             } else {
                 arKaaba.style.display = 'none';
             }
 
-            // Logik Penunjuk Sisi Atas Tanpa Lag
-            const tolerance = 1.5; 
+            // PEMBETULAN JULAT TOLERANSI (PENGESAHAN RALAT 0 DARJAH)
+            const tolerance = 2.0; 
 
             if (Math.abs(diff) <= tolerance) {
+                // Tepat pada arah kiblat (Ralat dilaraskan terus menjadi 0° untuk mengelakkan kekeliruan visual)
                 compassPlate.classList.add('perfect-match');
-                arrowLeft.style.display = 'none';
-                arrowRight.style.display = 'none';
-                dataDebug.innerHTML = `<span style="color: #00ff00; font-weight:bold;">Tepati Kiblat! Arah: ${currentHeading.toFixed(1)}°</span>`;
+                arrowLeftBox.style.display = 'none';
+                arrowRightBox.style.display = 'none';
+                dataDebug.innerHTML = `<span style="color: #00ff00; font-weight:bold;">Tepati Kiblat! Ralat: 0.0°</span>`;
             } else {
                 compassPlate.classList.remove('perfect-match');
                 dataDebug.innerText = `Arah Telefon: ${currentHeading.toFixed(1)}° | Ralat: ${diff.toFixed(1)}°`;
                 
+                // PEMBETULAN PANDUAN ISYARAT SISI ARROW HEAD KANAN/KIRI TANPA LAG
                 if (isArMode) {
                     if (diff > 0) {
-                        arrowRight.style.display = 'block'; // Diaktifkan serta-merta di Sisi Kanan Atas
-                        arrowLeft.style.display = 'none';
+                        arrowRightBox.style.display = 'block'; // Papar Arrow Head Kanan di Sisi Kanan Atas AR
+                        arrowLeftBox.style.display = 'none';
                     } else {
-                        arrowLeft.style.display = 'block';  // Diaktifkan serta-merta di Sisi Kiri Atas
-                        arrowRight.style.display = 'none';
+                        arrowLeftBox.style.display = 'block';  // Papar Arrow Head Kiri di Sisi Kiri Atas AR
+                        arrowRightBox.style.display = 'none';
                     }
                 } else {
-                    arrowLeft.style.display = 'none';
-                    arrowRight.style.display = 'none';
+                    arrowLeftBox.style.display = 'none';
+                    arrowRightBox.style.display = 'none';
                 }
             }
 
-            // --- PERBAIKAN LOGIK BUIH TIMBANG AIR (SERTA-MERTA & TEPAT) ---
+            // LOGIK BUIH TIMBANG AIR (SERTA-MERTA & TEPAT)
             let pitch = event.beta;  
             let roll = event.gamma;  
 
             if (pitch !== null && roll !== null) {
-                const maxOffset = 22; // Had maksimum pergerakan buih di dalam bulatan
+                const maxOffset = 22; 
                 
-                // Mengira perubahan posisi buih tanpa kesan lengah (lag)
                 let xOffset = (roll / 35) * maxOffset;
                 let yOffset = (pitch / 35) * maxOffset;
 
@@ -600,7 +641,6 @@
                 if (yOffset > maxOffset) yOffset = maxOffset;
                 if (yOffset < -maxOffset) yOffset = -maxOffset;
 
-                // Memposisikan buih berdasarkan anjakan dari titik tengah piring kompas
                 levelBubble.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
             }
         }
@@ -662,8 +702,8 @@
             } else {
                 stopCamera();
                 arView.style.display = 'none';
-                arrowLeft.style.display = 'none';
-                arrowRight.style.display = 'none';
+                arrowLeftBox.style.display = 'none';
+                arrowRightBox.style.display = 'none';
                 btnToggleAr.innerText = "BUKA VIDEO AR";
                 btnToggleAr.style.background = "#ffd700";
                 btnToggleAr.style.color = "#000";
